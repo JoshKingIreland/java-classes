@@ -1,0 +1,2535 @@
+package generalmethod;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import systemfiles.ObjectFile;
+import java.net.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.*;
+
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.lang.System;
+import java.util.concurrent.TimeUnit;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import dropshipgeneralmethods.COMM;
+import selenium_methods.SGM;
+
+
+public class GenMeth
+{
+	public static void openStringInFile(String data) throws Exception {
+		 Runtime rt = Runtime.getRuntime();
+		FileOutputStream x = new FileOutputStream("C:\\WebDriver\\TMP.txt");
+		x.write(data.getBytes());
+		x.close();
+		try {
+		     rt.exec("C:\\Program Files (x86)\\Notepad++\\notepad++.exe C:\\WebDriver\\TMP.txt");
+		}
+		catch (IOException ex) {
+		
+		System.out.println(ex);
+		
+		}  
+	}
+	
+	public static Set<String> returnUniqueDomainsPresent(String link){
+		Set<String> websites = new HashSet<String>();
+		try {
+			String content = GenMeth.sendGET(link);
+			String[] taggs  = GenMeth.find_multiple_elements(content,Pattern.compile("http").matcher(content),"\"  ","",0);
+			for(String x:taggs) {
+				try {
+					if(isSafeURL(x) == false) {
+						continue;
+					}
+							websites.add(x.split("/")[2]);
+					
+				}
+				catch(Exception e) {
+					
+				}
+			}	
+			}
+			catch(Exception e) {
+				
+			}	
+		return websites;
+	}
+	
+	public static Set<String> returnUniqueDomainsSubDirs(String link){
+		Set<String> websites = new HashSet<String>();
+		try {
+			String content = GenMeth.sendGET(link);
+			String[] taggs  = GenMeth.find_multiple_elements(content,Pattern.compile("http").matcher(content),"\"  ","",0);
+			for(String x :taggs) {
+				try {	
+					if(isSafeURL(x) == false) {
+						continue;
+					}
+					if(x.contains(link)) {
+						int direct_depth = x.split("/").length - 1;
+							String putinset = "/";
+								for(int i=3;i<direct_depth;++i) {
+									putinset += x.split("/")[i]+"/";
+								}
+								websites.add(putinset);
+					}
+				}
+				catch(Exception e) {
+					
+				}
+			}	
+			}
+			catch(Exception e) {
+				
+			}	
+		return websites;
+	}
+	
+	public static boolean isSafeURL(String url) {
+		if(		
+				url.contains("<")||
+				url.contains(">")||
+				url.contains("{")||
+				url.contains("}")||
+				url.contains("|")||
+				url.contains("^")||
+				url.contains("~")||
+				url.contains("[")||
+				url.contains(".png")||
+				url.contains(".jpg")||
+				url.contains(".jpeg")||
+				url.contains("cloudfront-us")||
+				url.contains("]")
+				) {
+				return false;
+			}
+		else {
+			return true;
+		}
+	}
+	
+	public static void main(String args[]) throws Exception {
+		
+		BufferedReader acc = new BufferedReader(new FileReader("C:\\DESP\\ig_account_files\\account_names.txt"));
+		String line ="";
+		Map<String,String> stats = new HashMap<String,String>();
+		while((line=acc.readLine())!=null) {
+			stats.put(line, "");
+		}
+		acc.close();
+		for(Entry<String,String> x:stats.entrySet()) {
+			BufferedReader toup = new BufferedReader(new FileReader("C:\\DESP\\ig_account_files\\"+x.getKey()+"\\content_folder\\to_be_uploaded.txt"));
+			String lined = "";
+			while((lined=toup.readLine())!=null) {
+				String rettie = x.getValue() +"1";
+				stats.put(x.getKey(), rettie);
+			}
+			toup.close();
+		}
+		for(Entry<String,String> x:stats.entrySet()) {
+			System.out.println(x.getKey()+": #"+x.getValue().length());
+		}
+	}
+	
+	public static void writeWholeToFile(String x,String filename) throws Exception{
+		BufferedWriter acc = new BufferedWriter(new FileWriter(filename));
+		acc.append(x+"x");
+		acc.close();
+	}
+
+	
+	public static String webTextConvert(String text) {
+		byte[] germanBytes = text.getBytes();
+		
+		return ( new String(germanBytes,StandardCharsets.UTF_8).replaceAll("�", "").replaceAll("\r", "").replaceAll("\\\\r", "").replaceAll("&#039;", "'").replaceAll("&#8217;", "'"));
+	}
+	
+	public static String removeEncased(String original, char start,char end) {
+		String ret="";
+		char[] data = original.toCharArray();
+		boolean avoid = false;
+		for(char ch:data) {
+			if(Character.compare(ch, start)==0) {
+				avoid = true;
+				continue;
+			}
+			else if(Character.compare(ch, end)==0) {
+				avoid = false;
+				continue;
+			}
+			else if(avoid==true) {
+				continue;
+			}
+			else {
+				avoid = false;
+				ret+=String.valueOf(ch);
+				continue;
+			}
+		}
+		
+		return ret.trim();
+	}
+	public static String root_dir = "C:\\\\Program Files\\\\DropshipBot";
+	
+	
+	public static void AppendToFile(String line, String filename) throws Exception {
+		if((new File(filename)).exists()) {
+			 Files.write(Paths.get(filename), ("\n"+line).getBytes(), StandardOpenOption.APPEND);
+		}
+		else {
+			BufferedWriter x = new BufferedWriter(new FileWriter(filename));
+			x.append(line);
+			x.close();
+		}
+	}
+	
+	
+	//
+	
+	public static boolean isEntryinfile(String entry, String filename) throws Exception {
+		if((new File(filename)).exists()) {
+			BufferedReader x = new BufferedReader(new FileReader(filename));
+			String line="";
+			boolean ret = false;
+			while((line=x.readLine())!=null) {
+				if(line.contains(entry)) {
+					ret = true;
+					break;
+				}
+				else {
+					continue;
+				}
+			}
+			x.close();
+			return ret; 
+		}
+		else {
+			new File(filename);
+			BufferedWriter x = new BufferedWriter(new FileWriter(filename));
+			x.close();
+			return false;
+		}
+	}
+	public static void PrintStringArray(String[] x) {
+		for(String y:x) {
+			System.out.println(y);
+		}
+	}
+	public static String moveToFirstLine(BufferedReader reader,int max_tries) throws IOException{
+		String ret = null;
+		if((ret=reader.readLine()).isEmpty()){
+			for(int i=1;i<max_tries;++i){
+				if(!(ret=reader.readLine()).isEmpty()){
+					break;
+				}
+				else{
+					continue;
+				}
+			}
+		}
+		else{
+		}
+		return ret;
+	}
+	public static String[] returnTopEntries(Map<String,String> x,int size) {
+		String[] ret = new String[size];
+		int freqs = 0;
+		for(int i=0;i<size;++i) {
+		freqs =0;
+		for(Entry<String,String> thing:x.entrySet()) {
+			
+			int freq = Integer.parseInt( thing.getValue());
+			if(freq>freqs) {
+				ret[i]=thing.getKey();
+			}
+			else {
+				continue;
+			}
+		}
+		x.remove(ret[i]);
+		
+		}
+		return ret;
+	}
+	
+	public static String[] fileLinesAsArray(String filename){
+		try {
+			List<String> ret = new ArrayList<String>();
+			BufferedReader x = new BufferedReader(new FileReader(filename));
+			String line="";
+			while((line=x.readLine())!=null) {
+				ret.add(line);
+			}
+			String[] retarray = new String[ret.size()];
+			retarray = ret.toArray(retarray);
+			return retarray;
+		}
+		catch(Exception e) {
+			return null;	
+		}
+		
+	}
+	
+	public static Map<String,String> returnTopEntriesMap(Map<String,String> x,int size) {
+		String[] ret = new String[size];
+		String[] retname = new String[size];
+		int freqs = 0;
+		for(int i=0;i<size;++i) {
+		freqs =0;
+		for(Entry<String,String> thing:x.entrySet()) {
+			int freq = 0;
+			try {
+				freq = Integer.parseInt( thing.getValue());
+			}
+			catch(Exception e) {
+				System.out.println("issue in value of amenity time");
+			}
+			if(freq!=0) {
+				 //freq = Integer.parseInt( thing.getValue());
+				//System.out.println( thing.getValue());
+				if(freq>freqs) {
+					ret[i]=thing.getKey();
+					retname[i]=thing.getValue();
+				}
+				else {
+					continue;
+				}
+			}
+		}
+		x.remove(ret[i]);
+		
+		}
+		Map<String,String> rettie = new HashMap<String,String>();
+		for(int i=0;i<size;++i) {
+			rettie.put(ret[i], retname[i]);
+		}
+		return rettie;
+	}
+	public static void rewriteFileWithout(String line,String filepath) throws Exception {
+		BufferedReader red = new BufferedReader(new FileReader(filepath));
+		BufferedWriter writ = new BufferedWriter(new FileWriter("C:\\DESP\\TMPfile.txt"));
+		String lined="";
+		while((lined = red.readLine())!=null) {
+			if(lined.contains(line)) {
+				continue;
+			}
+			else {
+				writ.append(lined);
+				writ.newLine();
+			}
+		}
+		
+		red.close();
+		writ.close();
+		File fromfile = new File("C:\\DESP\\TMPfile.txt");
+		Path from = fromfile.toPath(); //convert from File to Path
+		Path to = Paths.get(filepath); //convert from String to Path
+		Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
+	}
+	public static int getRandomInt(int range_start,int range_end) {
+		return (int) (range_start + ((Math.random()*(range_end-range_start))));
+	}
+	public static long getRandomLong(int range_start,int range_end) {
+		return (long) (range_start + ((Math.random()*(range_end-range_start))));
+	}
+	
+	public static int getDaysTillDelivery(String x) {
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM dd"); 
+			
+			LocalDateTime now = LocalDateTime.now(); 
+		   String ship_date = String.valueOf(dtf.format(now));
+		   
+		   int ship_day = Integer.parseInt(ship_date.substring(3,5));
+		   int ship_month = Integer.parseInt(ship_date.substring(0,2));
+
+		   int day = Integer.parseInt(x.substring(4,6));  
+		   String month = x.substring(0,3);
+		   int monthint = 0;
+		  if(month.equals("Jan")){
+			  monthint = 1;
+		  }
+		  if(month.equals("Feb")){
+			  monthint = 2;
+		  }
+		  if(month.equals("Mar")){
+			  monthint = 3;
+		  }
+		  if(month.equals("Apr")){
+			  monthint = 4;
+		  }
+		  if(month.equals("May")){
+			  monthint = 5;
+		  }
+		  if(month.equals("Jun")){
+			  monthint = 6;
+		  }
+		  if(month.equals("Jul")){
+			  monthint = 7;
+		  }
+		  if(month.equals("Aug")){
+			  monthint = 8;
+		  }
+		  if(month.equals("Sep")){
+			  monthint = 9;
+		  }
+		  if(month.equals("Oct")){
+			  monthint = 10;
+		  }
+		  if(month.equals("Nov")){
+			  monthint = 11;
+		  }
+		  if(month.equals("Dec")){
+			  monthint = 12;
+		  }
+		  int ret=0;
+		  int today = ship_day+(ship_month*30);
+		  int ship = day+(monthint*30);
+		  if(today>ship) {
+			  ret = (361-(today-ship));
+		  }
+		  else {
+			  ret = ship-today;
+		  }
+		  return ret;
+		  
+		 
+		     
+	}
+	public static int verification_check(String verifying_string, String httpdata){
+                        try{
+                    Matcher verificationmatch = Pattern.compile("european_merchant").matcher(httpdata);
+                    if(verificationmatch.find()==true){
+                        return 1;
+                    }
+                    else{
+                        return -1;
+                    }
+                }
+                    catch(Exception e){System.out.println("THERE IS NO HTTPDATA TO VERIFY THE ACCOUNT"); ReportCrash("verification check","something went wrong verifying the httpdata","idk");}
+                    return -1;
+                }              
+                
+                public static String getHeaderValue(String x, HttpURLConnection conn){
+                    String Hvalue = "";
+                    try{
+                        Map<String, List<String>> headerFields = conn.getHeaderFields();
+                        Set<String> headerFieldsSet = headerFields.keySet();
+                        Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                        Hvalue =  headerFields.get("Location").get(0).replace("\"","");
+                        }
+                    catch(Exception e){
+                       System.out.println("ERROR OCCURED WHEN ACCESSING THE HEADER FIELDS OF A HTTPURLCONNECTION IN THE METHOD 'getHeaderValue()'");
+                    }
+                    finally{
+                      return Hvalue;
+                    }
+                    
+                    
+                }
+                public static void crashreportlog(String method_name, String method_desc, String values_required, String val_desc, String acc_passed, String error_stack_trace)throws Exception {
+             	   DateFormat formatter = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
+             	   DateFormat formatter_filed = new SimpleDateFormat("dd!MM!yyyy_AT_HH_mm_ss");
+             	   Calendar calendar = Calendar.getInstance();
+             	   calendar.setTimeInMillis(System.currentTimeMillis());
+             	   String out = "An Error came up at "+formatter.format(calendar.getTime())+"\n";
+             	   out+="Name of the method that crashed: "+method_name+"\n";
+             	   out+="What This Method Does: "+method_desc+"\n";
+             	   out+="The Values That Are Passed To It: "+values_required+"\n";
+             	   out+="A description of each of the values: "+val_desc+"\n";
+             	   out+="The Values That Were Actually passed to the method:\n----------------------------------------------------\n"+acc_passed+"\n";
+             	   out+="----------------------------------------------------\n";
+             	   out+="Exception stack trace: "+error_stack_trace+"\n";
+             	   COMM.EmailSend(COMM.DEFAULT_recipient,"Crash Report At "+formatter.format(calendar.getTime()),out);   
+             	   FileOutputStream file = new FileOutputStream("C:\\DropshipBot\\Data\\crashreports\\"+formatter_filed.format(calendar.getTime())+".txt");
+             	   file.write(out.getBytes());
+             	   file.close();
+             	 }
+                public static void appendFile(String filename,String value)throws Exception {
+        			BufferedReader buf_r =  new BufferedReader(new FileReader(filename));
+        			BufferedWriter buf_w = new BufferedWriter(new FileWriter("C:\\\\DropshipBot\\\\Data\\\\tmp.txt"));
+        			String line;
+        			while((line = buf_r.readLine()) != null){
+        					buf_w.write(line);
+        					buf_w.newLine();
+        				
+        			}
+        			buf_w.write(value);
+        			buf_w.close();
+        			buf_r.close();
+        			new File(filename).delete();
+        			new File("C:\\\\DropshipBot\\\\Data\\\\tmp.txt").renameTo(new File(filename));
+        	}
+                
+                
+                public static void appendFile(FileOutputStream f,String filename, String value)throws Exception {
+        			BufferedReader buf_r =  new BufferedReader(new FileReader(filename));
+        			FileOutputStream buf_w = new FileOutputStream("C:\\\\DropshipBot\\\\Data\\\\tmp.txt");
+        			String line;
+        			while((line = buf_r.readLine()) != null){
+        					buf_w.write((line+"\n").getBytes());
+        					
+        				
+        			}
+        			buf_w.write(value.getBytes());
+        			
+        			buf_r.close();
+        			new File(filename).delete();
+        			new File("C:\\\\DropshipBot\\\\Data\\\\tmp.txt").renameTo(new File(filename));
+        	}
+            
+            public static void ReportCrash(String METHOD_NAME, String ISSUE, String SUGGEST_SOLUTION) {
+    SimpleDateFormat formatter_DATE = new SimpleDateFormat("dd_MM_yyyy_");
+        SimpleDateFormat formatter_DAY = new SimpleDateFormat(" _HH_mm_ss");
+        SimpleDateFormat formatter_REPORT = new SimpleDateFormat("(dd/MM/yyyy HH:mm:ss)");
+        Date date = new Date();
+        String crash_report_body = "Crash occured on:\t\t" + formatter_REPORT.format(date) + "\n Name of method where program crashed:\t\t" + METHOD_NAME + "\n The Issue Suggested By Josh In the code: " + ISSUE + "\n The Suggestion Put forward by Josh:\t\t" + SUGGEST_SOLUTION +""; 
+    
+    System.out.println("CRASH REPORT ON "+formatter_DATE.format(date)+"AT"+formatter_DAY.format(date));
+    String crash_report_name = "CRASH REPORT ON "+formatter_DATE.format(date)+"AT"+formatter_DAY.format(date);
+    try{
+            FileOutputStream fileOS = new FileOutputStream("C:\\\\Users\\\\user\\\\Desktop\\\\DropshipBOT\\\\"+crash_report_name+".txt");
+            byte[] outputdata = crash_report_body.getBytes();
+            fileOS.write(outputdata);
+            fileOS.close();
+        }
+        catch(Exception e){System.out.println("MAJOR ERROR OCCURED WHILE TRYING TO WRITE A CRASH REPORT FOR "+ METHOD_NAME+" WITH THE ISSUE: "+ ISSUE);}
+    
+        //ADD IN CODE LATER ON HERE TO CREATE AN EMAIL NOTIFICATION OF ANY 
+        //CRASH REPORTS
+        //ADD IN CODE LATER ON HERE TO CREATE AN EMAIL NOTIFICATION OF ANY 
+        //CRASH REPORTS
+        //ADD IN CODE LATER ON HERE TO CREATE AN EMAIL NOTIFICATION OF ANY 
+        //CRASH REPORTS
+}
+            
+            public static Map<String,String> SplitCookieToMap(String cookie, Map<String,String> cookie_map ){
+    try{
+        String[] cookie_array = cookie.split(";");
+        for(String e: cookie_array){
+            if(e.isEmpty() == true){break;}
+            e = e.replaceAll(" ","");
+            String[] cn2cv = e.split("=",2);
+            cn2cv[0] = cn2cv[0].replaceAll(" ","");
+            cn2cv[0] = cn2cv[0].replaceAll("\n","");
+            cn2cv[1] = cn2cv[1].replaceAll(" ","");
+            cn2cv[1] = cn2cv[1].replaceAll("\n","");
+            if(cookie_map.containsKey(cn2cv[0]) == true){
+                cookie_map.replace(cn2cv[0],cn2cv[1]);
+            }
+            else{
+                cookie_map.put(cn2cv[0],cn2cv[1]);
+            }
+        }
+        
+    }
+    catch(Exception e){
+        System.out.println("PROBLEM IN \"SplitCookieToMap\" WHILE SPLITTING UP COOKIES");
+        System.out.println("WARNING: COOKIE MAP HAS NOT CHANGED");
+    }
+    finally{
+        return cookie_map;
+    }
+    
+}
+
+public static String CookieMapIntoString( Map<String,String> cookie_map){
+    String return_string = "";
+    try{
+    	if(!cookie_map.keySet().isEmpty()) {
+	        for(String e: cookie_map.keySet()){
+	            if(return_string.isEmpty()==true){
+	                return_string = return_string.concat(e+"="+cookie_map.get(e));
+	            }
+	            else{
+	                return_string = return_string.concat(";"+e+"="+cookie_map.get(e));
+	            }
+	        }
+        }
+    	else {
+
+    	}
+    }
+    catch(Exception e){
+        System.out.println("PROBLEM IN \"CookieMapIntoString\" WHILE PUTTING TOGETHER COOKIE STRING FOR HTTP REQUEST");
+        System.out.println("WARNING: THE COOKIE NOW SENDING ON THE HTTP REQUEST IS EMPTY");
+    }
+    finally{
+        return return_string;
+    }   
+}       
+                 public static String read_fileline (String filenameje, int linenumber){
+                    byte[] fileline = new byte[1];
+                    String return_string = "";
+                   try{
+                        FileInputStream filestream = new FileInputStream(filenameje);
+                        while(true){
+                            if(filestream.read(fileline) == -1){break;}
+                            else{
+                                
+                                return_string = return_string.concat(new String(fileline, StandardCharsets.UTF_8));
+                            }   
+                        }
+                        filestream.close();
+                    }
+                    catch(Exception e){System.out.println("ERROR IN 'read_fileline' METHOD ");}
+                    
+                    return_string =return_string.replaceAll("\n","");
+                    return_string =return_string.replaceAll(" ","");
+                    
+                    return String.valueOf(return_string);
+                    
+                }
+                public static String read_fileline (FileInputStream filenamej){
+                    byte[] fileline = new byte[1];
+                    String return_string = "";
+                   try{
+                        while(true){
+                            if(filenamej.read(fileline) == -1){break;}
+                            else{
+                                
+                                return_string = return_string.concat(new String(fileline, StandardCharsets.UTF_8));
+                            }   
+                        }
+                    }
+                    catch(Exception e){System.out.println("ERROR IN 'read_fileline' METHOD ");}
+                    
+                    return_string =return_string.replaceAll("\n","");
+                    return_string =return_string.replaceAll(" ","");
+                    
+                    return String.valueOf(return_string);
+                    
+                }
+                
+                public static String TranslateUTF(String filenamej){
+                    byte[] fileline = new byte[1];
+                    String return_string = "";
+                    char[] pje = filenamej.toCharArray();
+                   try{
+                        for(char x:pje){
+                            	fileline[0] = (byte) x;
+                                return_string = return_string.concat(new String(fileline, StandardCharsets.UTF_8));
+                            }  
+                        
+                    }
+                    catch(Exception e){System.out.println("ERROR IN 'read_fileline' METHOD ");}
+                    
+                    return_string =return_string.replaceAll("\n","");
+                    return_string =return_string.replaceAll(" ","");
+                    
+                    return String.valueOf(return_string);
+                    
+                }
+                
+                public static String read_line(FileInputStream filenameje, int line_number){
+                    byte[] fileline = new byte[1];
+                    String return_string = "";
+                   try{
+                        while(true){
+                            if(filenameje.read(fileline) == -1){break;}
+                            if(String.valueOf(filenameje.read(fileline)) == "\\\\"){break;}
+                            else{
+                                return_string = return_string.concat(new String(fileline, StandardCharsets.UTF_8));
+                            }   
+                        }
+                        filenameje.close();
+                    }
+                    catch(Exception e){System.out.println("ERROR IN 'read_fileline' METHOD ");}
+                    
+                    
+                    return String.valueOf(return_string);
+                    
+                }
+                public static String[] sendGET_SETCOOKIES(String x) throws IOException {
+                    URL c = new URL(x);
+                    HttpURLConnection conn = (HttpURLConnection) c.openConnection();
+                    StringBuffer response = new StringBuffer();
+                    String[] return_StringArray = new String[2];
+                    int responseCode = conn.getResponseCode();
+                    System.out.println("GET Response Code :: " + responseCode);
+                    if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                        BufferedReader in = new BufferedReader(new InputStreamReader(
+                                conn.getInputStream()));
+                        String inputLine;
+                        
+            
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+                      
+                    } else {
+                        System.out.println("GET-FOR-EBAY-TESTING request not worked");
+                        response.append("EMPTY");
+                    }
+                    return_StringArray[0] = String.valueOf(response);
+                
+                    Map<String, List<String>> headerFields = conn.getHeaderFields();
+                    
+                    
+                    String CookieName = "";
+                    Set<String> headerFieldsSet = headerFields.keySet();
+                    Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                    
+                    while (hearerFieldsIter.hasNext()) {
+                     
+                     String headerFieldKey = hearerFieldsIter.next();
+                     
+                      
+                     if ("Set-Cookie".equals(headerFieldKey)) {
+                         
+                         List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                          
+                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                              
+                            
+                              
+                            String[] fields = headerFieldValue.get(i).split(";");
+                            if(CookieName == ""){
+                                CookieName = CookieName.concat(fields[0]);
+                            }
+                            else{
+                                CookieName = CookieName.concat(";"+fields[0]);
+                            }
+                          }
+                      }
+                        else{
+                          
+                  
+                        }
+                    }
+                  return_StringArray[1] = CookieName; 
+                  
+                  return return_StringArray;
+            }
+                                                          public static String[] sendGET_SETCOOKIES(HttpURLConnection conn) throws IOException {
+                                                                
+                                                                    StringBuffer response = new StringBuffer();
+                                                                    String[] return_StringArray = new String[2];
+                                                                    int responseCode = conn.getResponseCode();
+                                                                    System.out.println("GET Response Code :: " + responseCode);
+                                                                    if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                                                                        BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                                conn.getInputStream()));
+                                                                        String inputLine;
+                                                                        
+                                                            
+                                                                        while ((inputLine = in.readLine()) != null) {
+                                                                            response.append(inputLine);
+                                                                        }
+                                                                        in.close();
+                                                                      
+                                                                    } else {
+                                                                        System.out.println("GET-FOR-EBAY-TESTING request not worked");
+                                                                        response.append("EMPTY");
+                                                                    }
+                                                                    return_StringArray[0] = String.valueOf(response);
+                                                                
+                                                                    Map<String, List<String>> headerFields = conn.getHeaderFields();
+                                                                    
+                                                                    
+                                                                    String CookieName = "";
+                                                                    Set<String> headerFieldsSet = headerFields.keySet();
+                                                                    Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                                                                    
+                                                                    while (hearerFieldsIter.hasNext()) {
+                                                                     
+                                                                     String headerFieldKey = hearerFieldsIter.next();
+                                                                     
+                                                                      
+                                                                     if ("Set-Cookie".equals(headerFieldKey)) {
+                                                                         
+                                                                         List<String> headerFieldValue =  headerFields.get(headerFieldKey);
+                                                                          
+                                                                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                                                                              
+                                                                            
+                                                                              
+                                                                            String[] fields = headerFieldValue.get(i).split(";");
+                                                                            if(CookieName == ""){
+                                                                                CookieName = CookieName.concat(fields[0]);
+                                                                            }
+                                                                            else{
+                                                                                CookieName = CookieName.concat(";"+fields[0]);
+                                                                            }
+                                                                          }
+                                                                      }
+                                                                        else{
+                                                                          
+                                                                  
+                                                                        }
+                                                                    }
+                                                                  return_StringArray[1] = CookieName; 
+                                                                  
+                                                                  return return_StringArray;
+                                                            }
+                                                            
+/*public static String GenerateJSON(Map<String,String> map){
+    String ret = "{";
+    map.forEach((k, v) -> {String x = ""; x += k + ":" + v;});
+    ret+= x;
+    return ret;
+}  */   
+public static Map<String,String> DismantleJSON(String x){
+     Map<String,String> ret = new HashMap<String,String>();
+     System.out.println(ret);
+     return ret;
+     
+}
+                       
+public static String find_single_element(String webpage,int skip_times, Matcher regex_start, String element_terminate /*MAX 3 CHARACTERS*/, String element_name, int beginning_offset){
+    char[] linkstr = new char[6000];
+    int strlen = 0;
+    for(int u=0;u<skip_times;++u){
+        if(skip_times==0){break;}
+        else{regex_start.find();}
+    }
+        try{
+             if(regex_start.find() == false){System.out.println("could not find"+element_name+"");}
+             else{
+                for(int i =beginning_offset;i<6000;++i){ 
+                         if(webpage.charAt(regex_start.start()+i) == element_terminate.charAt(0)){
+                             if(webpage.charAt(regex_start.start()+i+1) == element_terminate.charAt(1)||element_terminate.charAt(1) == ' '){
+                                if(webpage.charAt(regex_start.start()+i+2) == element_terminate.charAt(2)||element_terminate.charAt(2) == ' '){
+                                    strlen=i+1;
+                                    break;
+                                    
+                                }
+                              }
+                            }
+                         else{   
+                             linkstr[i] = webpage.charAt(regex_start.start()+i);
+                            }
+                        }
+                     
+                     
+                    
+                    }
+            }
+            catch(Exception e){System.out.println("something went wrong while trying to find a title");}
+    
+     String x = new String(linkstr, 0, strlen);
+     x=x.trim();
+     return x;
+}
+                                                    public static String[] find_multiple_elements(String webpage, Matcher regex_start, String element_terminate /*MAX 3 CHARACTERS*/, String element_name, int beginning_offset){
+                                                                        List<String> return_array = new ArrayList<>();
+                                                                        
+                                                                        while(true){
+                                                                            char[] linkstr = new char[6000];
+                                                                             try{
+                                                                             if(regex_start.find() == false){
+                                                                                  break;
+                                                                                }
+                                                                             else{
+                                                                                     
+                                                                                     
+                                                                                     for(int i =beginning_offset;i<6000;++i){
+                                                                                         
+                                                                                         if(webpage.charAt(regex_start.start()+i) == element_terminate.charAt(0)){
+                                                                                             if(webpage.charAt(regex_start.start()+i+1) == element_terminate.charAt(1)||element_terminate.charAt(1) == ' '){
+                                                                                                if(webpage.charAt(regex_start.start()+i+2) == element_terminate.charAt(2)||element_terminate.charAt(2) == ' '){
+                                                                                                    break;
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                         else{   
+                                                                                             linkstr[i] = webpage.charAt(regex_start.start()+i);
+                                                                                            }
+                                                                                        }
+                                                                                    return_array.add(String.valueOf(linkstr).trim());
+                                                                                    
+                                                                                     
+                                                                                    
+                                                                                    }
+                                                                    }
+                                                                    catch(Exception e){System.out.println("something went wrong while trying to find a title");}
+                                                        }
+                                                         String[] x = new String[return_array.size()];
+                                                         Iterator<String> list_iter = return_array.iterator();
+                                                         int u=0;
+                                                         while (list_iter.hasNext()) {
+                                                             x[u] = list_iter.next();
+                                                             u+=1;
+                                                            }
+                                                         
+                                                         return x;
+                                                    }
+                                              public static String[] find_multiple_elements(String webpage,int no_of_iterations, Matcher regex_start, String element_terminate /*MAX 3 CHARACTERS*/, String element_name, int beginning_offset){
+                                                                        String[] return_array = new String[no_of_iterations];
+                                                            
+                                                                        for(int u=0;u<no_of_iterations;++u){
+                                                                            char[] linkstr = new char[6000];
+                                                                try{
+                                                                             if(regex_start.find() == false){
+                                                                                 if(u< 2){
+                                                                                     System.out.println("could not find"+element_name+"");
+                                                                                    }
+                                                                                 break;
+                                                                                }
+                                                                             else{
+                                                                                     
+                                                                                     
+                                                                                     for(int i =beginning_offset;i<6000;++i){
+                                                                                         
+                                                                                         if(webpage.charAt(regex_start.start()+i) == element_terminate.charAt(0)){
+                                                                                             if(webpage.charAt(regex_start.start()+i+1) == element_terminate.charAt(1)||element_terminate.charAt(1) == ' '){
+                                                                                                if(webpage.charAt(regex_start.start()+i+2) == element_terminate.charAt(2)||element_terminate.charAt(2) == ' '){
+                                                                                                    break;
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                         else{   
+                                                                                             linkstr[i] = webpage.charAt(regex_start.start()+i);
+                                                                                            }
+                                                                                        }
+                                                                                    return_array[u] = String.valueOf(linkstr).trim();
+                                                                                    
+                                                                                     
+                                                                                    
+                                                                                    }
+                                                                    }
+                                                                    catch(Exception e){System.out.println("something went wrong while trying to find a title");}
+                                                        }
+                                                                        //PrintStringArray(return_array);
+                                                         return return_array;
+                                                    }
+                                                    
+                                                    public static String[] find_multiple_elements(String webpage,int no_of_iterations, Matcher regex_start, String element_terminate /*MAX 3 CHARACTERS*/, String element_name, String start_pos){
+                                                                        String[] return_array = new String[no_of_iterations];
+                                                            
+                                                                        for(int u=0;u<no_of_iterations;++u){
+                                                                            char[] linkstr = new char[2000];
+                                                                try{
+                                                                             if(regex_start.find() == false){
+                                                                                 if(u< 2){
+                                                                                     System.out.println("could not find"+element_name+"");
+                                                                                    }
+                                                                                 break;
+                                                                                }
+                                                                             else{
+                                                                                    int Starting_index = 0;
+                                                                                     while(true){
+                                                                                         if(webpage.charAt(regex_start.start()+Starting_index) == start_pos.charAt(0)){
+                                                                                             if(webpage.charAt(regex_start.start()+Starting_index+1) == start_pos.charAt(1)||start_pos.charAt(1) == ' '){
+                                                                                                if(webpage.charAt(regex_start.start()+Starting_index+2) == start_pos.charAt(2)||start_pos.charAt(2) == ' '){
+                                                                                                    break;
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                            else{
+                                                                                                
+                                                                                                Starting_index+=1;
+                                                                                                if(Starting_index > 400){break;}
+                                                                                            }
+                                                                                        }
+                                                                                     
+                                                                                     for(int i =0;i<2000;++i){
+                                                                                         
+                                                                                         if(webpage.charAt(regex_start.start()+i+Starting_index) == element_terminate.charAt(0)){
+                                                                                             if(webpage.charAt(regex_start.start()+i+1+Starting_index) == element_terminate.charAt(1)||element_terminate.charAt(1) == ' '){
+                                                                                                if(webpage.charAt(regex_start.start()+i+2+Starting_index) == element_terminate.charAt(2)||element_terminate.charAt(2) == ' '){
+                                                                                                    break;
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                         else{   
+                                                                                             linkstr[i] = webpage.charAt(regex_start.start()+i+Starting_index);
+                                                                                            }
+                                                                                        }
+                                                                                    return_array[u] = String.valueOf(linkstr).trim();
+                                                                                    
+                                                                                     
+                                                                                    
+                                                                                    }
+                                                                    }
+                                                                    catch(Exception e){System.out.println("something went wrong while trying to find a title");}
+                                                        }
+                                                                       //PrintStringArray(return_array);
+                                                         return return_array;
+                                                         
+                                                    }
+                                                    public static void PNG_to_JPG(String src,String tmp_trgt ) {
+                                                    	try {
+		                                                	  Path source = Paths.get(src);
+		                                                      Path target = Paths.get(tmp_trgt);
+		
+		                                                      BufferedImage originalImage = ImageIO.read(source.toFile());
+		
+		                                                      // jpg needs BufferedImage.TYPE_INT_RGB
+		                                                      // png needs BufferedImage.TYPE_INT_ARGB
+		
+		                                                      // create a blank, RGB, same width and height
+		                                                      BufferedImage newBufferedImage = new BufferedImage(
+		                                                              originalImage.getWidth(),
+		                                                              originalImage.getHeight(),
+		                                                              BufferedImage.TYPE_INT_RGB);
+		
+		                                                      // draw a white background and puts the originalImage on it.
+		                                                      newBufferedImage.createGraphics()
+		                                                              .drawImage(originalImage,
+		                                                                      0,
+		                                                                      0,
+		                                                                      Color.WHITE,
+		                                                                      null);
+		
+		                                                      // save an image
+		                                                      ImageIO.write(newBufferedImage, "jpg", target.toFile());
+	                                                    	
+//	                                                    	
+//	                                                    	File imageFile = new File(tmp_trgt);
+//	                                                        File compressedImageFile = new File(trgt);
+//	                                                 
+//	                                                        InputStream is = new FileInputStream(imageFile);
+//	                                                        OutputStream os = new FileOutputStream(compressedImageFile);
+//	                                                 
+//	                                                        float quality = 0.5f;
+//	                                                 
+//	                                                        // create a BufferedImage as the result of decoding the supplied InputStream
+//	                                                        BufferedImage image = ImageIO.read(is);
+//	                                                 
+//	                                                        // get all image writers for JPG format
+//	                                                        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+//	                                                 
+//	                                                        if (!writers.hasNext())
+//	                                                            throw new IllegalStateException("No writers found");
+//	                                                 
+//	                                                        ImageWriter writer = (ImageWriter) writers.next();
+//	                                                        ImageOutputStream ios = ImageIO.createImageOutputStream(os);
+//	                                                        writer.setOutput(ios);
+//	                                                 
+//	                                                        ImageWriteParam param = writer.getDefaultWriteParam();
+//	                                                 
+//	                                                        // compress to a given quality
+//	                                                        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+//	                                                        param.setCompressionQuality(quality);
+//	                                                 
+//	                                                        // appends a complete image stream containing a single image and
+//	                                                        //associated stream and image metadata and thumbnails to the output
+//	                                                        writer.write(null, new IIOImage(image, null, null), param);
+//	                                                 
+//	                                                        // close all streams
+//	                                                        is.close();
+//	                                                        os.close();
+//	                                                        ios.close();
+//	                                                        writer.dispose();
+                                                    	}
+                                            		catch(Exception e) {
+                                            			System.out.println("ERROR: "+e.toString());
+                                            			System.out.println("ERROR: "+e.toString());
+                                            			System.out.println("Description: "+e.getMessage());
+                                            		}
+                                                    	
+                                                    }
+                                                    
+                                                    public static String sendGET(String GETURL) throws IOException {
+                                                        URL obj = new URL(GETURL);
+                                                        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                                                        con.setRequestMethod("GET");
+                                                        StringBuffer response = new StringBuffer();
+                                                        
+                                                        int responseCode = con.getResponseCode();
+                                                        System.out.println("GET Response Code :: " + responseCode);
+                                                        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                                                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                    con.getInputStream()));
+                                                            String inputLine;
+                                                            
+                                                
+                                                            while ((inputLine = in.readLine()) != null) {
+                                                            	//System.out.println(inputLine);
+                                                                response.append(inputLine);
+                                                            }
+                                                            in.close();
+                                                          
+                                                        } else {
+                                                            System.out.println("GET request was not 200");
+                                                            response.append("EMPTY");
+                                                        }
+                                                        return String.valueOf(response);
+                                                        
+                                                
+                                                    }
+                                                    public static String findMaxArrayFrequency(String[] x) {
+                                                    	Map<String,int[]> poje = new HashMap<String,int[]>();
+                                                    	for(String x1:x) {
+                                                    		
+                                                    		if(poje.containsKey(x1)==true) {
+                                                    			int[] re = {poje.get(x1)[0]+1};
+                                                    			poje.replace(x1,re);
+                                                    		}
+                                                    		else {
+                                                    			int[] re = {0};
+                                                    			poje.put(x1,re);
+                                                    		}
+                                                    	}
+                                                    	String max_string = "";
+                                                    	int max_int = 0;
+                                                    	for (Map.Entry<String, int[]> entry : poje.entrySet())
+                                                    	{
+                                                    	   if(entry.getValue()[0]>max_int) {
+                                                    		   max_int = entry.getValue()[0];
+                                                    		   max_string = entry.getKey();
+                                                    	   }
+                                                    	   else {
+                                                    		   continue;
+                                                    	   }
+                                                    	}
+                                                    	return max_string;
+                                                    }
+                                                    public static void printTimeRemaining(float fraction_finished, long time_started) {
+                                                    	long time_spent =  System.currentTimeMillis() - time_started;
+                                                    	float time_s = Float.parseFloat(String.valueOf(time_spent));
+                                                    	float time_left = ((time_s*(1/fraction_finished))- time_s)/1000;
+                                                    	if(time_left>3600) {
+                                                    		System.out.println("Time Remaining: "+ (time_left/3600) + " Hours.");
+                                                    	}
+                                                    	else if(time_left>60) {
+                                                    		System.out.println("Time Remaining: "+ (time_left/60) + " Minutes.");
+                                                    	}
+                                                    	
+                                                    	else {
+                                                    		System.out.println("Time Remaining: "+ time_left + " Seconds.");
+                                                    	}
+                                                    	
+                                                    }
+                                                        
+                                                    public static String sendGET(String[] r_p, String[] r_p_v, String GETURL) throws IOException {
+                                                        URL obj = new URL(GETURL);
+                                                        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                                                        con.setRequestMethod("GET");
+                                                        StringBuffer response = new StringBuffer();
+                                                        for(int i = 0;i<r_p.length;++i){
+                                                        con.addRequestProperty( r_p[i],r_p_v[i]);
+                                                       }
+                                                        int responseCode = con.getResponseCode();
+                                                        System.out.println("GET Response Code :: " + responseCode);
+                                                        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                                                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                    con.getInputStream()));
+                                                            String inputLine;
+                                                            
+                                                
+                                                            while ((inputLine = in.readLine()) != null) {
+                                                                response.append(inputLine);
+                                                            }
+                                                            in.close();
+                                                          
+                                                        } else {
+                                                            System.out.println("GET request was not 200");
+                                                            response.append("EMPTY");
+                                                        }
+                                                        return String.valueOf(response);
+                                                        
+                                                
+                                                    }
+                                                    
+                                                    public static Map<String,String> returnListFrequencies(List<String> x){
+                                                    	Map<String,String> ret = new HashMap<String,String>();
+                                                    	for(String y:x) {
+                                                    		if(ret.containsKey(y)) {
+                                                    			int iter = Integer.parseInt(ret.get(y));
+                                                    			iter+=1;
+                                                    			String riter = String.valueOf(iter);
+                                                    			ret.put(y, riter);
+                                                    		}
+                                                    		else {
+                                                    			ret.put(y, "1");
+                                                    		}
+                                                    	}
+                                                    	return ret;
+                                                    }
+                                                    public static String[] sendGET_SETCOOKIES(String Cookie, String httpdata,String link)throws Exception {
+                                                    	URL obj = new URL(link);
+                                                        HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
+                                                        String[] return_array = new String[2];      
+                                                        conn.setRequestMethod("GET");
+                                                        StringBuffer response = new StringBuffer();
+                                                        response.append(" ");
+                                                        conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+                                                        conn.addRequestProperty("Cookie",Cookie);
+                                                        
+                                                        byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+                                                        conn.setDoOutput(true);
+                                                        OutputStream os = conn.getOutputStream();
+                                                        os.write(data);
+                                                        os.flush();
+                                                        os.close();
+                            
+                                                        int responseCode = conn.getResponseCode();
+                                                        System.out.println("GOT RESPONSE CODE");
+                                                        System.out.println("POST Response Code :: " + responseCode);
+                                                        
+                                                
+                                                        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                                                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                    conn.getInputStream()));
+                                                            String inputLine;
+                                                            
+                                                
+                                                            while ((inputLine = in.readLine()) != null) {
+                                                            response.append(inputLine);
+                                                        }
+                                                        in.close();
+                                                      
+                                                   } else {
+                                                        System.out.println("POST request not worked");
+                                                        response.append("EMPTY");
+                                                    }
+                                                    return_array[0] = String.valueOf(response);
+                                                    System.out.println(return_array[0] + "HERE");
+                                                         
+                                                                Map<String, List<String>> headerFields = conn.getHeaderFields();
+                                                                
+                                                                
+                                                                String CookieName = "";
+                                                                Set<String> headerFieldsSet = headerFields.keySet();
+                                                                Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                                                                
+                                                                while (hearerFieldsIter.hasNext()) {
+                                                                     
+                                                                     String headerFieldKey = hearerFieldsIter.next();
+                                                                     
+                                                                      
+                                                                     if ("Set-Cookie".equals(headerFieldKey)) {
+                                                                         
+                                                                         List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                                                                          
+                                                                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                                                                              
+                                                                            
+                                                                              
+                                                                            String[] fields = headerFieldValue.get(i).split(";");
+                                                                            if(CookieName == ""){
+                                                                                CookieName = CookieName.concat(fields[0]);
+                                                                            }
+                                                                            else{
+                                                                                CookieName = CookieName.concat(";"+fields[0]);
+                                                                            }
+                                                                          }
+                                                                      }
+                                                                        else{
+                                                                          
+                                                                  
+                                                                        }
+                                                                    }
+                                                                   return_array[1] = CookieName; 
+                                                                   return return_array;
+                                                        }
+                                                    
+                                                    
+                                                     
+                                                       public static String[] sendGET_SETCOOKIES(String Cookie, String httpdata,HttpURLConnection conn)throws Exception {
+                                                    	   
+                                                        String[] return_array = new String[2];      
+                                                        conn.setRequestMethod("GET");
+                                                        StringBuffer response = new StringBuffer();
+                                                        response.append(" ");
+                                                        conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+                                                        conn.addRequestProperty("Cookie",Cookie);
+                                                        
+                                                        byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+                                                        conn.setDoOutput(true);
+                                                        OutputStream os = conn.getOutputStream();
+                                                        os.write(data);
+                                                        os.flush();
+                                                        os.close();
+                            
+                                                        int responseCode = conn.getResponseCode();
+                                                        System.out.println("GOT RESPONSE CODE");
+                                                        System.out.println("POST Response Code :: " + responseCode);
+                                                        
+                                                
+                                                        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                                                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                    conn.getInputStream()));
+                                                            String inputLine;
+                                                            
+                                                
+                                                            while ((inputLine = in.readLine()) != null) {
+                                                            response.append(inputLine);
+                                                        }
+                                                        in.close();
+                                                      
+                                                   } else {
+                                                        System.out.println("POST request not worked");
+                                                        response.append("EMPTY");
+                                                    }
+                                                    return_array[0] = String.valueOf(response);
+                                                    System.out.println(return_array[0] + "HERE");
+                                                         
+                                                                Map<String, List<String>> headerFields = conn.getHeaderFields();
+                                                                
+                                                                
+                                                                String CookieName = "";
+                                                                Set<String> headerFieldsSet = headerFields.keySet();
+                                                                Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                                                                
+                                                                while (hearerFieldsIter.hasNext()) {
+                                                                     
+                                                                     String headerFieldKey = hearerFieldsIter.next();
+                                                                     
+                                                                      
+                                                                     if ("Set-Cookie".equals(headerFieldKey)) {
+                                                                         
+                                                                         List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                                                                          
+                                                                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                                                                              
+                                                                            
+                                                                              
+                                                                            String[] fields = headerFieldValue.get(i).split(";");
+                                                                            if(CookieName == ""){
+                                                                                CookieName = CookieName.concat(fields[0]);
+                                                                            }
+                                                                            else{
+                                                                                CookieName = CookieName.concat(";"+fields[0]);
+                                                                            }
+                                                                          }
+                                                                      }
+                                                                        else{
+                                                                          
+                                                                  
+                                                                        }
+                                                                    }
+                                                                   return_array[1] = CookieName; 
+                                                                   return return_array;
+                                                        }
+                                                       public static String[] sendGET_SETCOOKIES(Map<String,String> cookie_map, String httpdata,String url){
+                                                        	String[] return_array = new String[2];      
+                                                        	try {
+                                                        	URL ebay = new URL(url);
+                                                           HttpURLConnection conn = (HttpURLConnection) ebay.openConnection();	
+                                                           conn.setRequestMethod("GET");
+                                                           StringBuffer response = new StringBuffer();
+                                                           response.append("EMPTY");
+                                                           String Cookie = GenMeth.CookieMapIntoString(cookie_map);
+                                                           conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+                                                           conn.addRequestProperty("Cookie",Cookie);
+                                                           int responseCode = conn.getResponseCode();
+                                                           System.out.println("GOT Response Code :: " + responseCode);
+                                                           
+                                                           
+                                                           if(responseCode == 200){ // success
+                                                               BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                       conn.getInputStream()));
+                                                               String inputLine;
+                                                               
+
+                                                               while ((inputLine = in.readLine()) != null) {
+                                                               response.append(inputLine);
+                                                           }
+                                                           in.close();
+                                                         
+                                                      
+                                                       return_array[0] = String.valueOf(response);}
+                                                           else{return_array[0] =""+ responseCode;}
+                                                      
+                                                            
+                                                                   Map<String, List<String>> headerFields = conn.getHeaderFields();
+                                                                   
+                                                                   
+                                                                   String CookieName = "";
+                                                                   Set<String> headerFieldsSet = headerFields.keySet();
+                                                                   Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                                                                   
+                                                                   while (hearerFieldsIter.hasNext()) {
+                                                                        
+                                                                        String headerFieldKey = hearerFieldsIter.next();
+                                                                        
+                                                                         
+                                                                        if ("Set-Cookie".equals(headerFieldKey)) {
+                                                                            
+                                                                            List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                                                                             
+                                                                          for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                                                                                 
+                                                                               
+                                                                                 
+                                                                               String[] fields = headerFieldValue.get(i).split(";");
+                                                                               if(CookieName == ""){
+                                                                                   CookieName = CookieName.concat(fields[0]);
+                                                                               }
+                                                                               else{
+                                                                                   CookieName = CookieName.concat(";"+fields[0]);
+                                                                               }
+                                                                             }
+                                                                         }
+                                                                           else{
+                                                                             
+                                                                     
+                                                                           }
+                                                                        
+                                                                       }
+                                                                      return_array[1] = CookieName; 
+                                                                      conn.disconnect();
+                                                        	}catch(Exception e) {}
+                                                                      return return_array;
+                                                           }
+public static void downloadOnlineFile(String url,String filetype,String final_directory,String filename) throws IOException {
+	URL ebay = new URL(url);
+    HttpURLConnection conn = (HttpURLConnection) ebay.openConnection();	
+    InputStream input = conn.getInputStream();
+	
+	FileOutputStream os = new FileOutputStream(final_directory+"\\"+filename+"."+filetype);
+	byte[] buf = new byte[8096];
+    int n = 0;
+    while (-1!=(n=input.read(buf)))
+        {
+           os.write(buf);
+           os.flush();
+           System.out.print("yes");
+        }
+    input.close();
+    os.close();
+}
+
+//public static String[] sortMap(Map<String,String> inp){
+//	String[] ret = new String[inp.size()];
+//	int[] ret_indices = new int[inp.size()];
+//	int[] count
+//	
+//	return ret;
+//}
+
+public static String fileNameFriendlyDateTime() {
+	Date dNow = new Date( );
+    SimpleDateFormat ft = 
+    new SimpleDateFormat ("dd-MM-yyyy_hh-mm");
+
+    return (ft.format(dNow));
+}
+//public static long getVideoDuration(String filename) {
+//	IContainer container = IContainer.make();
+//	int result = container.open(filename, IContainer.Type.READ, null);
+//	long duration = container.getDuration();
+//	long fileSize = container.getFileSize();
+//}
+private static void copyFileUsingStream(File source, File dest) throws IOException {
+    InputStream is = null;
+    OutputStream os = null;
+    try {
+        is = new FileInputStream(source);
+        os = new FileOutputStream(dest);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = is.read(buffer)) > 0) {
+            os.write(buffer, 0, length);
+        }
+    } finally {
+        is.close();
+        os.close();
+    }
+}
+
+public static void takeScreenShot(WebDriver webdriver,String fileWithPath) throws Exception{
+
+    //Convert web driver object to TakeScreenshot
+
+    TakesScreenshot scrShot =((TakesScreenshot)webdriver);
+
+    //Call getScreenshotAs method to create image file
+
+            File SrcFile=scrShot.getScreenshotAs(OutputType.FILE);
+
+        //Move image file to new destination
+
+            File DestFile=new File(fileWithPath);
+
+            //Copy file at destination
+            copyFileUsingStream(SrcFile, DestFile);
+
+}
+public static void downloadFromURL(String url,String filename) throws IOException {
+	//try{
+		BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
+		FileOutputStream fileOutputStream = new FileOutputStream(filename);
+		byte dataBuffer[] = new byte[1024];
+		int bytesRead;
+	    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+	        fileOutputStream.write(dataBuffer, 0, bytesRead);
+	    }
+	    in.close();
+	    fileOutputStream.close();
+//  	}catch (IOException e) {
+//	    // handle exception
+//	  	}
+}
+public static void downloadFile(String url,String filetype,String final_directory,String filename) throws IOException
+{
+     	URL irl = new URL(url);
+     	HttpURLConnection conn = (HttpURLConnection) irl.openConnection();	
+    		InputStream in = conn.getInputStream();
+        ReadableByteChannel rbc = Channels.newChannel(in);
+        FileOutputStream fos = new FileOutputStream(final_directory+"\\"+filename+"."+filetype);
+        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+    }
+
+public static void downloadOnlineNew(String url,String filename) throws IOException
+{
+     	URL irl = new URL(url);
+     	HttpURLConnection conn = (HttpURLConnection) irl.openConnection();	
+    		InputStream in = conn.getInputStream();
+        ReadableByteChannel rbc = Channels.newChannel(in);
+        FileOutputStream fos = new FileOutputStream(filename);
+        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+    }
+public static void WaterMarkBat(String video_folder,String filename,String account_name,int width,int height) throws Exception {
+	String bat_name ="C:\\DESP\\MISC\\tmpffmpeg"+account_name+java.lang.System.currentTimeMillis()+".bat";
+	BufferedWriter batfile = new BufferedWriter(new FileWriter(bat_name));
+	String original_file = video_folder+filename+".mp4";
+	String tmp_file = video_folder+filename+"TMP.mp4";
+	String horiwatermark = "C:\\DESP\\visualcontent\\watermarks\\horizontal_wm.jpg";
+	//String sidebar = "C:\\DESP\\visualcontent\\watermarks\\sb.jpg";
+		
+	batfile.write("@echo off");
+	batfile.newLine();
+	
+	batfile.write("cd C:\\ffmpeg\\bin");
+	batfile.newLine();
+
+	batfile.write("ffmpeg -i "+original_file+" -vf scale="+720+":"+1280+" -crf 18 "+tmp_file);batfile.newLine();
+	batfile.write("del \""+original_file+"\"");batfile.newLine();batfile.write("ren "+tmp_file+" "+filename+".mp4");batfile.newLine();
+
+	
+//	batfile.write("ffmpeg -i "+original_file+" -i "+sidebar+" -filter_complex \"overlay=530:0\" "+tmp_file);batfile.newLine();
+//	batfile.write("del \""+original_file+"\"");batfile.newLine();batfile.write("ren "+tmp_file+" "+filename+".mp4");batfile.newLine();
+//	
+//	batfile.write("ffmpeg -i "+original_file+" -i "+sidebar+" -filter_complex \"overlay=0:0\" "+tmp_file);batfile.newLine();
+//	batfile.write("del \""+original_file+"\"");batfile.newLine();batfile.write("ren "+tmp_file+" "+filename+".mp4");batfile.newLine();
+	
+	batfile.write("ffmpeg -i "+original_file+" -i "+horiwatermark+" -filter_complex \"overlay=0:0\" "+tmp_file);batfile.newLine();
+	batfile.write("del \""+original_file+"\"");batfile.newLine();batfile.write("ren "+tmp_file+" "+filename+".mp4");batfile.newLine();
+	
+	batfile.write("ffmpeg -i "+original_file+" -i "+horiwatermark+" -filter_complex \"overlay=0:1147\" "+tmp_file);batfile.newLine();
+	batfile.write("del \""+original_file+"\"");batfile.newLine();batfile.write("ren "+tmp_file+" "+filename+".mp4");batfile.newLine();
+	
+	//batfile.write("cmd /k");batfile.newLine();
+	batfile.close();
+	
+	Process p = Runtime.getRuntime().exec("cmd /c start "+bat_name);
+	(new File(bat_name)).delete();
+	
+}
+public static List<String> returnFileLinesAsList(String file)throws Exception{
+	List<String> ret = new ArrayList<String>();
+	BufferedReader x = new BufferedReader(new FileReader(file));
+	String line = "";
+	while((line=x.readLine())!=null) {
+		ret.add(line);
+	}
+	return ret;
+}
+public static Set<String> returnFileLinesAsSet(String file)throws Exception{
+	Set<String> ret = new HashSet<String>();
+	BufferedReader x = new BufferedReader(new FileReader(file));
+	String line = "";
+	while((line=x.readLine())!=null) {
+		ret.add(line);
+	}
+	return ret;
+}
+public static Map<String,String> returnFileLinesAsMap(String file, String delimiter)throws Exception{
+	Map<String,String> ret = new HashMap<String,String>();
+	BufferedReader x = new BufferedReader(new FileReader(file));
+	String line = "";
+	while((line=x.readLine())!=null) {
+		ret.put(line.split(delimiter)[0],line.split(delimiter)[0]);
+	}
+	return ret;
+}
+public static void makeFileIfNotExist(String filepath) throws Exception {
+	File file = new File(filepath);
+    if(!file.exists()) {
+    	FileOutputStream x = new FileOutputStream(filepath);
+    	x.close();
+    }
+    else {
+    	
+    }
+}
+public static String[] sendPostWithFile_SETCOOKIES(Map<String,String> cookie_map, String httpdata_before_file,String file_x,String httpdata_after_file, HttpURLConnection conn)throws Exception{
+    System.out.println("1");
+    String[] return_array = new String[2];      
+    conn.setRequestMethod("POST");
+    StringBuffer response = new StringBuffer();
+    response.append("EMPTY");
+    String Cookie = CookieMapIntoString(cookie_map);
+    conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+    conn.addRequestProperty("Cookie",Cookie);
+    
+    
+    System.out.println("2");
+    File fi = new File(file_x);
+    System.out.println("3");
+    InputStream input = new BufferedInputStream(new FileInputStream(fi));
+    conn.setDoOutput(true);
+    System.out.println("4");
+    OutputStream os = conn.getOutputStream();
+    System.out.println("5");
+    byte[] data = httpdata_before_file.getBytes(StandardCharsets.UTF_8);
+    System.out.println("6");
+    os.write(data);
+    byte[] buf = new byte[1024];
+    int n = 0;
+    while (-1!=(n=input.read(buf)))
+        {
+           os.write(buf);
+           System.out.print("yes");
+        }
+    input.close();
+    data = httpdata_after_file.getBytes(StandardCharsets.UTF_8);
+    os.write(data);
+    os.flush();
+    os.close();
+    int responseCode = conn.getResponseCode();
+    System.out.println("GOT Response Code :: " + responseCode);
+    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    String inputLine;
+    while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+            }
+    in.close();
+    return_array[0] = String.valueOf(response);
+    Map<String, List<String>> headerFields = conn.getHeaderFields();
+    String CookieName = "";
+    Set<String> headerFieldsSet = headerFields.keySet();
+    Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+    while (hearerFieldsIter.hasNext()) {
+        String headerFieldKey = hearerFieldsIter.next();
+        if ("Set-Cookie".equals(headerFieldKey)) {
+            List<String> headerFieldValue = headerFields.get(headerFieldKey);
+            for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                String[] fields = headerFieldValue.get(i).split(";");
+                if(CookieName == ""){
+                    CookieName = CookieName.concat(fields[0]);
+                        }
+                else{
+                    CookieName = CookieName.concat(";"+fields[0]);
+                    }
+            }
+        }
+        else{}
+    }
+    return_array[1] = CookieName; 
+    return return_array;
+    }
+    public static String[] sendPost_SETCOOKIES(Map<String,String> cookie_map, String httpdata,HttpURLConnection conn)throws Exception{
+                                                     
+                                                        String[] return_array = new String[2];      
+                                                        conn.setRequestMethod("POST");
+                                                        StringBuffer response = new StringBuffer();
+                                                        response.append("EMPTY");
+                                                        String Cookie = CookieMapIntoString(cookie_map);
+                                                        conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+                                                        conn.addRequestProperty("Cookie",Cookie);
+                                                       
+                                                        
+                                                        byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+                                                        conn.setDoOutput(true);
+                                                        OutputStream os = conn.getOutputStream();
+                                                        os.write(data);
+                                                        os.flush();
+                                                        os.close();
+                            
+                                                        int responseCode = conn.getResponseCode();
+                                                        System.out.println("GOT Response Code :: " + responseCode);
+                                                        
+                                                
+                                                         // success
+                                                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                    conn.getInputStream()));
+                                                            String inputLine;
+                                                            
+                                                
+                                                            while ((inputLine = in.readLine()) != null) {
+                                                            response.append(inputLine);
+                                                        }
+                                                        in.close();
+                                                      
+                                                   
+                                                    return_array[0] = String.valueOf(response);
+                                                   
+                                                         
+                                                                Map<String, List<String>> headerFields = conn.getHeaderFields();
+                                                                
+                                                                
+                                                                String CookieName = "";
+                                                                Set<String> headerFieldsSet = headerFields.keySet();
+                                                                Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                                                                
+                                                                while (hearerFieldsIter.hasNext()) {
+                                                                     
+                                                                     String headerFieldKey = hearerFieldsIter.next();
+                                                                     
+                                                                      
+                                                                     if ("Set-Cookie".equals(headerFieldKey)) {
+                                                                         
+                                                                         List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                                                                          
+                                                                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                                                                              
+                                                                            
+                                                                              
+                                                                            String[] fields = headerFieldValue.get(i).split(";");
+                                                                            if(CookieName == ""){
+                                                                                CookieName = CookieName.concat(fields[0]);
+                                                                            }
+                                                                            else{
+                                                                                CookieName = CookieName.concat(";"+fields[0]);
+                                                                            }
+                                                                          }
+                                                                      }
+                                                                        else{
+                                                                          
+                                                                  
+                                                                        }
+                                                                    }
+                                                                   return_array[1] = CookieName; 
+                                                                   return return_array;
+                                                        }
+    
+    
+    
+    
+    public static String[] sendRequestGeneral(String requesttype, Map<String,String> cookie_map,Map<String,String> header_map, String httpdata,String url)throws Exception{
+        
+    	URL ebay = new URL(url);
+	    HttpURLConnection conn = (HttpURLConnection) ebay.openConnection();	
+        String[] return_array = new String[2];      
+        conn.setRequestMethod(requesttype);
+        StringBuffer response = new StringBuffer();
+        response.append("EMPTY");
+        String Cookie = CookieMapIntoString(cookie_map);
+        //conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+        System.out.println("COOKIE: "+Cookie);
+        if(Cookie.length()>20) {
+        	System.out.println("COOKIE: "+Cookie);
+        	 conn.addRequestProperty("Cookie",Cookie);
+        }
+        if(!header_map.isEmpty()) {
+        	System.out.println("Header: "+Cookie);
+        header_map.forEach((key, value) ->  conn.addRequestProperty(key,value));
+        }
+        
+        byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+        conn.setDoOutput(true);
+        OutputStream os = conn.getOutputStream();
+        os.write(data);
+        os.flush();
+        os.close();
+
+        int responseCode = conn.getResponseCode();
+        System.out.println("GOT Response Code :: " + responseCode);
+        
+
+         // success
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    conn.getInputStream()));
+            String inputLine;
+            
+
+            while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+      
+   
+    return_array[0] = String.valueOf(response);
+   
+         
+                Map<String, List<String>> headerFields = conn.getHeaderFields();
+                
+                
+                String CookieName = "";
+                Set<String> headerFieldsSet = headerFields.keySet();
+                Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                
+                while (hearerFieldsIter.hasNext()) {
+                     
+                     String headerFieldKey = hearerFieldsIter.next();
+                     
+                      
+                     if ("Set-Cookie".equals(headerFieldKey)) {
+                         
+                         List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                          
+                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                              
+                            
+                              
+                            String[] fields = headerFieldValue.get(i).split(";");
+                            if(CookieName == ""){
+                                CookieName = CookieName.concat(fields[0]);
+                            }
+                            else{
+                                CookieName = CookieName.concat(";"+fields[0]);
+                            }
+                          }
+                      }
+                        else{
+                          
+                  
+                        }
+                    }
+                   return_array[1] = CookieName; 
+                   return return_array;
+        }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+public static String[] sendPost_SETCOOKIES_ADDHEADERS(Map<String,String> cookie_map,Map<String,String> header_map, String httpdata,HttpURLConnection conn)throws Exception{
+                                                     
+                                                        String[] return_array = new String[2];      
+                                                        conn.setRequestMethod("POST");
+                                                        StringBuffer response = new StringBuffer();
+                                                        response.append("EMPTY");
+                                                        String Cookie = CookieMapIntoString(cookie_map);
+                                                        conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+                                                        conn.addRequestProperty("Cookie",Cookie);
+                                                        header_map.forEach((key, value) ->  conn.addRequestProperty(key,value));
+                                                        
+                                                        byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+                                                        conn.setDoOutput(true);
+                                                        OutputStream os = conn.getOutputStream();
+                                                        os.write(data);
+                                                        os.flush();
+                                                        os.close();
+                            
+                                                        int responseCode = conn.getResponseCode();
+                                                        System.out.println("GOT Response Code :: " + responseCode);
+                                                        
+                                                
+                                                         // success
+                                                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                    conn.getInputStream()));
+                                                            String inputLine;
+                                                            
+                                                
+                                                            while ((inputLine = in.readLine()) != null) {
+                                                            response.append(inputLine);
+                                                        }
+                                                        in.close();
+                                                      
+                                                   
+                                                    return_array[0] = String.valueOf(response);
+                                                   
+                                                         
+                                                                Map<String, List<String>> headerFields = conn.getHeaderFields();
+                                                                
+                                                                
+                                                                String CookieName = "";
+                                                                Set<String> headerFieldsSet = headerFields.keySet();
+                                                                Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                                                                
+                                                                while (hearerFieldsIter.hasNext()) {
+                                                                     
+                                                                     String headerFieldKey = hearerFieldsIter.next();
+                                                                     
+                                                                      
+                                                                     if ("Set-Cookie".equals(headerFieldKey)) {
+                                                                         
+                                                                         List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                                                                          
+                                                                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                                                                              
+                                                                            
+                                                                              
+                                                                            String[] fields = headerFieldValue.get(i).split(";");
+                                                                            if(CookieName == ""){
+                                                                                CookieName = CookieName.concat(fields[0]);
+                                                                            }
+                                                                            else{
+                                                                                CookieName = CookieName.concat(";"+fields[0]);
+                                                                            }
+                                                                          }
+                                                                      }
+                                                                        else{
+                                                                          
+                                                                  
+                                                                        }
+                                                                    }
+                                                                   return_array[1] = CookieName; 
+                                                                   return return_array;
+                                                        }
+               public static String[] sendPostWithFile_SETCOOKIES_ADDHEADERS(Map<String,String> cookie_map,Map<String,String> header_map, String httpdata_before_file,String file_x,String httpdata_after_file, HttpURLConnection conn)throws Exception{
+    System.out.println("1");
+    String[] return_array = new String[2];      
+    conn.setRequestMethod("POST");
+    StringBuffer response = new StringBuffer();
+    response.append("EMPTY");
+    String Cookie = CookieMapIntoString(cookie_map);
+    conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+    header_map.forEach((key, value) ->  conn.addRequestProperty(key,value));
+    File fi = new File(file_x);
+    InputStream input = new BufferedInputStream(new FileInputStream(fi));
+    conn.setDoOutput(true);
+    OutputStream os = conn.getOutputStream();
+    byte[] data = httpdata_before_file.getBytes(StandardCharsets.UTF_8);
+    os.write(data);
+    byte[] buf = new byte[1024];
+    int n = 0;
+    while (-1!=(n=input.read(buf)))
+        {
+           os.write(buf);
+        }
+    input.close();
+    data = httpdata_after_file.getBytes(StandardCharsets.UTF_8);
+    os.write(data);
+    os.flush();
+    os.close();
+    int responseCode = conn.getResponseCode();
+    System.out.println("GOT Response Code :: " + responseCode);
+    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    String inputLine;
+    while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+            }
+    in.close();
+    return_array[0] = String.valueOf(response);
+    Map<String, List<String>> headerFields = conn.getHeaderFields();
+    String CookieName = "";
+    Set<String> headerFieldsSet = headerFields.keySet();
+    Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+    while (hearerFieldsIter.hasNext()) {
+        String headerFieldKey = hearerFieldsIter.next();
+        if ("Set-Cookie".equals(headerFieldKey)) {
+            List<String> headerFieldValue = headerFields.get(headerFieldKey);
+            for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                String[] fields = headerFieldValue.get(i).split(";");
+                if(CookieName == ""){
+                    CookieName = CookieName.concat(fields[0]);
+                        }
+                else{
+                    CookieName = CookieName.concat(";"+fields[0]);
+                    }
+            }
+        }
+        else{}
+    }
+    return_array[1] = CookieName; 
+    return return_array;
+    }
+    public static String[] genericRequest(String request_type, Map<String,String> cookie_map,Map<String,String> header_map, String httpdata,HttpURLConnection conn)throws Exception{
+    String[] return_array = new String[2];      
+    conn.setRequestMethod(request_type);
+    StringBuffer response = new StringBuffer();
+    response.append("EMPTY");
+    String Cookie = CookieMapIntoString(cookie_map);
+    conn.addRequestProperty("Cookie",Cookie);
+    header_map.forEach((key, value) ->  conn.addRequestProperty(key,value));
+    byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+    conn.setDoOutput(true);
+    OutputStream os = conn.getOutputStream();
+    os.write(data);
+    os.flush();
+    os.close();
+    
+    int responseCode = conn.getResponseCode();
+    System.out.println("GOT Response Code :: " + responseCode);
+    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    String inputLine;
+    
+    while ((inputLine = in.readLine()) != null) {
+        response.append(inputLine);
+        
+    }
+    in.close();
+    return_array[0] = String.valueOf(response);
+    Map<String, List<String>> headerFields = conn.getHeaderFields();
+    String CookieName = "";
+    Set<String> headerFieldsSet = headerFields.keySet();
+    Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+    while (hearerFieldsIter.hasNext()) {
+         String headerFieldKey = hearerFieldsIter.next();
+         if ("Set-Cookie".equals(headerFieldKey)) {
+            List<String> headerFieldValue = headerFields.get(headerFieldKey);  
+            for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                  
+                String[] fields = headerFieldValue.get(i).split(";");
+                if(CookieName == ""){
+                    CookieName = CookieName.concat(fields[0]);
+                }
+                else{
+                    CookieName = CookieName.concat(";"+fields[0]);
+                }   
+            }
+         }
+          else{}
+        }
+       return_array[1] = CookieName; 
+       return return_array;
+}
+public static Map<String,String> CollectSavedCookies(String filename){
+    if(Pattern.compile(".txt").matcher(filename).find()){
+        filename = "C:\\\\Users\\\\user\\\\Desktop\\\\DropshipBOT\\\\"+filename;
+    }
+    else{
+        filename = "C:\\\\Users\\\\user\\\\Desktop\\\\DropshipBOT\\\\"+filename+".txt";
+    }
+    Map<String,String> ret = new HashMap<String,String>();
+    String user_input_cookie = read_fileline (filename, 1);
+    ret = SplitCookieToMap(user_input_cookie, ret );
+    return ret;
+}
+public static void TestHTMLConversion(String input)throws Exception{
+    FileOutputStream file = new FileOutputStream("C:\\\\Users\\\\user\\\\Desktop\\\\testpage.html");
+        
+        String page = input.replaceAll(">",">\n");
+        file.write(page.getBytes());
+        file.close();
+}
+public static String ReadFileToString(String filename)throws Exception{
+    BufferedReader x = new BufferedReader(new FileReader(filename));
+    String ret = "";
+    String y =x.readLine();
+    while(y != null){
+        ret+=y;
+        y=x.readLine();
+    }
+    return ret;
+}
+public static String[] GeneralHTTPRequest(String request_method, HashMap<String,String> cookie_map,Map<String, String> bin, String httpdata,String url)throws Exception{
+                                                     	
+														URL ebay = new URL(url);
+													    HttpURLConnection conn = (HttpURLConnection) ebay.openConnection();	
+                                                        String[] return_array = new String[2];      
+                                                        conn.setRequestMethod(request_method);
+                                                        StringBuffer response = new StringBuffer();
+                                                        response.append("");
+                                                        String Cookie = CookieMapIntoString(cookie_map);
+                                                       // conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+                                                       //F conn.addRequestProperty("Cookie",Cookie);
+                                                        bin.forEach((key, value) ->  conn.addRequestProperty(key,value));
+                                                        
+                                                        byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+                                                        conn.setDoOutput(true);
+                                                        OutputStream os = conn.getOutputStream();
+                                                        os.write(data);
+                                                        os.flush();
+                                                        os.close();
+                            
+                                                        int responseCode = conn.getResponseCode();
+                                                        System.out.println("GOT Response Code :: " + responseCode);
+                                                        
+                                                
+                                                         // success
+                                                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                                    conn.getInputStream()));
+                                                            String inputLine;
+                                                            
+                                                
+                                                            while ((inputLine = in.readLine()) != null) {
+                                                            response.append(inputLine);
+                                                        }
+                                                        in.close();
+                                                      
+                                                   
+                                                    return_array[0] = String.valueOf(response);
+                                                   
+                                                         
+                                                                Map<String, List<String>> headerFields = conn.getHeaderFields();
+                                                                
+                                                                
+                                                                String CookieName = "";
+                                                                Set<String> headerFieldsSet = headerFields.keySet();
+                                                                Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+                                                                
+                                                                while (hearerFieldsIter.hasNext()) {
+                                                                     
+                                                                     String headerFieldKey = hearerFieldsIter.next();
+                                                                     
+                                                                      
+                                                                     if ("Set-Cookie".equals(headerFieldKey)) {
+                                                                         
+                                                                         List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                                                                          
+                                                                       for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                                                                              
+                                                                            
+                                                                              
+                                                                            String[] fields = headerFieldValue.get(i).split(";");
+                                                                            if(CookieName == ""){
+                                                                                CookieName = CookieName.concat(fields[0]);
+                                                                            }
+                                                                            else{
+                                                                                CookieName = CookieName.concat(";"+fields[0]);
+                                                                            }
+                                                                          }
+                                                                      }
+                                                                        else{
+                                                                          
+                                                                  
+                                                                        }
+                                                                    }
+                                                                   return_array[1] = CookieName; 
+                                                                   return return_array;
+                                                        }
+
+
+public static String[] GeneralHTTPRequest(String request_method,String Cookie, String httpdata,String url)throws Exception{
+ 	
+	URL ebay = new URL(url);
+    HttpURLConnection conn = (HttpURLConnection) ebay.openConnection();	
+    String[] return_array = new String[2];      
+    conn.setRequestMethod(request_method);
+    StringBuffer response = new StringBuffer();
+    response.append("");
+    
+    conn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36");
+    conn.addRequestProperty("Cookie",Cookie);
+     
+    if(request_method.equals("POST")) {
+    byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+    conn.setDoOutput(true);
+    OutputStream os = conn.getOutputStream();
+    os.write(data);
+    os.flush();
+    os.close();
+
+    }
+    int responseCode = conn.getResponseCode();
+    System.out.println("GOT Response Code :: " + responseCode);
+    
+
+     // success
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                conn.getInputStream()));
+        String inputLine;
+        
+        if((inputLine = in.readLine())== null) {
+        	
+        }
+        else {
+        while ((inputLine = in.readLine()) != null) {
+        response.append(inputLine);
+        }
+    }
+    in.close();
+  
+
+return_array[0] = String.valueOf(response);
+
+     
+            Map<String, List<String>> headerFields = conn.getHeaderFields();
+            
+            
+            String CookieName = "";
+            Set<String> headerFieldsSet = headerFields.keySet();
+            Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
+            
+            while (hearerFieldsIter.hasNext()) {
+                 
+                 String headerFieldKey = hearerFieldsIter.next();
+                 
+                  
+                 if ("Set-Cookie".equals(headerFieldKey)) {
+                     
+                     List<String> headerFieldValue = headerFields.get(headerFieldKey);
+                      
+                   for (int i = headerFieldValue.size() - 1; i >= 0 ; i--) {
+                          
+                        
+                          
+                        String[] fields = headerFieldValue.get(i).split(";");
+                        if(CookieName == ""){
+                            CookieName = CookieName.concat(fields[0]);
+                        }
+                        else{
+                            CookieName = CookieName.concat(";"+fields[0]);
+                        }
+                      }
+                  }
+                    else{
+                      
+              
+                    }
+                }
+               return_array[1] = CookieName; 
+               return return_array;
+    }
+
+
+
+
+
+
+private static String sendPOST(String[] r_p, String[] r_p_v, String httpdata, String POSTURL) throws IOException {
+    
+    URL obj = new URL(POSTURL);
+    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+    con.setRequestMethod("POST");
+    StringBuffer response = new StringBuffer();
+    
+     for(int i = 0;i<r_p.length;++i){
+    con.addRequestProperty( r_p[i],r_p_v[i]);
+   }
+   
+    byte[] data = httpdata.getBytes(StandardCharsets.UTF_8);
+    con.setDoOutput(true);
+    OutputStream os = con.getOutputStream();
+    os.write(data);
+    os.flush();
+    os.close();
+    int responseCode = con.getResponseCode();
+    System.out.println("POST Response Code :: " + responseCode);
+
+    if (responseCode == HttpURLConnection.HTTP_OK) { // success
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                con.getInputStream()));
+        String inputLine;
+        
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+      
+    } else {
+        System.out.println("POST request not worked");
+        response.append("EMPTY");
+    }
+    return String.valueOf(response);
+
+}
+
+public static Map<String,String> AddressMap(String fname,String lname, String adr_one, String adr_two, String region, String zip, String country, String city, String phone){
+	Map<String,String> ret = new HashMap<String,String>();
+	ret.put("firstname",fname );
+	ret.put("lastname",lname );
+	ret.put("addressone",adr_one );
+	ret.put("addresstwo", adr_two);
+	ret.put("region", region);
+	ret.put("zip",zip );
+	ret.put("country", country);
+	ret.put("city",city );
+	ret.put("phone", phone);
+	return ret;
+}
+
+public static String date_time() {
+	 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+	   LocalDateTime now = LocalDateTime.now();  
+	   return String.valueOf(dtf.format(now));
+}
+
+
+
+public static Object[] checkEbaySales(String most_recent_sale_id, String cookies)throws Exception {
+	String[] webdata = GeneralHTTPRequest("GET",cookies,"","https://www.ebay.ie/mys/sold/rf/sort=MOST_RECENTLY_SOLD&filter=ALL&limit=100&period=LAST_30_DAYS");
+	//System.out.println(webdata[0]);
+	String[] order_links = GenMeth.find_multiple_elements(webdata[0],Pattern.compile("FetchOrderDetails").matcher(webdata[0]),"cla","",0);
+	
+		int end_index = 0;
+		ArrayList<String> arr = new ArrayList<String>();
+		for(int i=0;i<order_links.length;++i) {
+//			System.out.println("======================================================================================");
+//			System.out.println(order_links[i]+"||"+order_links[0].length());
+//			System.out.println(order_links[i].substring(17));
+//			System.out.println("itemid="+order_links[i].split("itemid")[1]);
+//			System.out.println("======================================================================================");
+			order_links[i] = "https://www.ebay.ie/vod/FetchOrderDetails?itemid="+ order_links[i].split("itemid")[1];
+			//System.out.println(order_links[i]);
+			if(order_links[i].contains(most_recent_sale_id)) {
+				end_index = i;
+				break;
+			}
+			else {
+				arr.add(order_links[i]);
+				continue;
+				
+			}
+		}
+		Object[] ret = arr.toArray();
+//		
+		return ret;
+	
+}
+
+public static Map<String,String>  collectEbaySaleData(String link,String cookies, WebDriver driver) throws Exception{
+	String[] webdata = GeneralHTTPRequest("GET",cookies,"",link);
+	System.out.println(webdata[0]);
+	String adr1 = GenMeth.find_single_element(webdata[0],0,Pattern.compile("addressLine1").matcher(webdata[0]),"\", ","",15);
+	String adr2 = GenMeth.find_single_element(webdata[0],0,Pattern.compile("addressLine2").matcher(webdata[0]),"\", ","",15);
+	String phone = GenMeth.find_single_element(webdata[0],1,Pattern.compile("phoneNumber").matcher(webdata[0]),"\", ","",14);
+	String name = GenMeth.find_single_element(webdata[0],5,Pattern.compile("\"name\"").matcher(webdata[0]),"\", ","",8);
+	String city = GenMeth.find_single_element(webdata[0],0,Pattern.compile("\"city\"").matcher(webdata[0]),"\", ","",8);
+	String zip = GenMeth.find_single_element(webdata[0],0,Pattern.compile("\"zip\"").matcher(webdata[0]),"\", ","",7);
+	String country = GenMeth.find_single_element(webdata[0],0,Pattern.compile("\"country\"").matcher(webdata[0]),"\", ","",11);
+	String quantity = GenMeth.find_single_element(webdata[0],0,Pattern.compile("\"quantity\"").matcher(webdata[0]),",  ","",11);
+	String market_uid = link.split("itemid=")[1].split("&")[0];	
+	String revenue = GenMeth.find_single_element(webdata[0],0,Pattern.compile("totalOrderCost").matcher(webdata[0]),"\", ","",40);
+	
+	
+	
+	webdata = GeneralHTTPRequest("GET",cookies,"","https://www.ebay.ie/mys/sold/rf/sort=MOST_RECENTLY_SOLD&filter=ALL&limit=100&period=LAST_30_DAYS");
+	String specs_block = GenMeth.find_single_element(webdata[0],1,Pattern.compile("Item number: "+market_uid).matcher(webdata[0]),"</d","",0);
+	String[] specs = GenMeth.find_multiple_elements(webdata[0],Pattern.compile("sku-variation__item").matcher(webdata[0]),"<!-","",30);
+	Map<String,String> ret = AddressMap(name.split(" ")[0],name.split(" ")[1],adr1,adr2,city,zip,country,city,phone);
+	
+	
+	specs_block = "";
+	for(String x:specs) {
+		specs_block+=x+";";
+	}
+	ret.put("specs", specs_block);
+	ret.put("quantity", quantity);
+	ret.put("revenue", revenue);
+	return ret;
+	
+}
+public static String getAliExpressCookies(WebDriver driver)throws Exception{
+	String ret = "";
+	
+	try{
+		
+		driver.get("https://login.aliexpress.com/");
+		SGM.pause(2);
+    	WebElement email_input = new WebDriverWait(driver,20).until(e ->  driver.findElement(By.id("fm-login-id")));
+    	email_input.sendKeys("buachailbeag@gmail.com");
+        WebElement pass_word = driver.findElement(By.id("fm-login-password"));
+        pass_word.sendKeys("meme1212");
+        driver.findElement(By.cssSelector("[class=fm-button]")).click();
+		SGM.pause(5);
+		for(Cookie ck : driver.manage().getCookies()) { 
+			ret+= ck.getName()+"="+ck.getValue()+"; ";
+		}
+		
+}
+	catch(Exception e){
+		System.out.println("ERROR: "+e.toString());
+		System.out.println("ERROR: "+e.toString());
+		System.out.println("Description: "+e.getMessage());
+	}
+	finally{
+		return ret;
+		
+	}
+	
+}
+
+
+public static String getEbayCookies(WebDriver driver)throws Exception{
+	String ret = "";
+	
+	try{
+		boolean check = false;
+		for(Cookie ck : driver.manage().getCookies()) {
+			 if( ck.getDomain( ).contains("ebay")) {
+				 check = true;
+				 break;
+			 }
+		}
+		if(check==false) {
+		driver.get("https://www.ebay.ie");
+		SGM.pause(3);
+//		SGM.InterruptForElement_XPATH(5, "span[@id ='gh-ug']//a[1]", driver).click();
+//		SGM.pause(3);
+		driver.get("https://signin.ebay.ie/ws/eBayISAPI.dll?SignIn&ru=https%3A%2F%2Fwww.ebay.ie%2F");
+		SGM.pause(3);
+		WebElement we = SGM.InterruptForElement(60, "#userid", driver);
+		SGM.sendAuthText(we,"theironpp@gmail.com");
+		SGM.pause(1);
+		SGM.InterruptForElement(60, "#userid", driver).sendKeys(Keys.ENTER);
+		
+		SGM.pause(5);
+		Actions actions = new Actions(driver);
+		we = SGM.InterruptForElement(5, "#pass", driver);
+		SGM.sendAuthText(we,"PojePoje321!");
+		SGM.pause(1);
+		SGM.InterruptForElement(30, "#pass", driver).sendKeys(Keys.ENTER);
+		SGM.pause(3);
+		}
+		
+		
+}
+	catch(Exception e){
+		System.out.println("ERROR: "+e.toString());
+		System.out.println("ERROR: "+e.toString());
+		System.out.println("Description: "+e.getMessage());
+	}
+	finally{
+		for(Cookie ck : driver.manage().getCookies()) {
+			 if( ck.getDomain( ).contains("ebay")) {
+			ret+= ck.getName()+"="+ck.getValue()+";";
+			}
+			else {
+				continue;
+			}
+		}
+		return ret;
+		
+	}
+	
+}
+
+public static void markSaleDispatchedEbay(String cookies, String item_id, String trans_id) throws Exception {
+	String[] webdata = GeneralHTTPRequest("GET",cookies,"","https://www.ebay.ie/mys/sold/rf/sort=MOST_RECENTLY_SOLD&filter=PAID_SHIP_NOW");
+    String dispatch_link = GenMeth.find_single_element(webdata[0],0,Pattern.compile("orderId="+item_id+"-"+trans_id).matcher(webdata[0]),">  ","",0).split(" ")[0];
+	System.out.println("https://www.ebay.ie/om/shipment/update?"+dispatch_link);
+	dispatch_link = "https://www.ebay.ie/om/shipment/update?"+dispatch_link;
+	webdata = GeneralHTTPRequest("GET",cookies,"",dispatch_link);	
+}
+
+public static String activeListingRead(String supplier_or_market, String website)throws Exception {
+	BufferedReader in = new BufferedReader(new FileReader("C:\\DropshipBot\\Data\\activelistings\\activelistings.txt"));
+	String line="";
+	String ret = "";
+	while((line=in.readLine())!=null) {
+		if(line.contains(supplier_or_market)&&line.contains(website)) {
+			ret = line;
+			break;
+		}
+		else {
+			continue;
+		}
+	}
+	return ret;
+}
+public static String activeListingRead(String supplier_or_market)throws Exception {
+	BufferedReader in = new BufferedReader(new FileReader("C:\\DropshipBot\\Data\\activelistings\\activelistings.txt"));
+	String line="";
+	String ret = "";
+	while((line=in.readLine())!=null) {
+		if(line.contains(supplier_or_market)) {
+			ret = line;
+			break;
+		}
+		else {
+			continue;
+		}
+	}
+	return ret;
+}
+
+public static boolean activeListingSearch(String supplier_or_market)throws Exception {
+	String x = activeListingRead(supplier_or_market);
+	if(x.isEmpty()) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+
+
+public static void addActiveListing(String supplieruid,String sitename, String marketid)throws Exception {
+	appendFile("C:\\DropshipBot\\Data\\activelistings\\activelistings.txt",supplieruid+"::"+sitename+"::"+marketid);
+}
+
+public static void removeActiveListing(String supplier_or_market)throws Exception{
+	BufferedReader buf_r =  new BufferedReader(new FileReader("C:\\DropshipBot\\Data\\activelistings\\activelistings.txt"));
+	BufferedWriter buf_w = new BufferedWriter(new FileWriter("C:\\\\DropshipBot\\\\Data\\\\tmp.txt"));
+	String line;
+	while((line = buf_r.readLine()) != null){
+		if(line.contains(supplier_or_market)) {
+			continue;
+		}
+		else {
+			buf_w.write(line);
+			buf_w.newLine();
+		}
+			
+		
+	}
+	buf_w.close();
+	buf_r.close();
+	new File("C:\\DropshipBot\\Data\\activelistings\\activelistings.txt").delete();
+	new File("C:\\\\DropshipBot\\\\Data\\\\tmp.txt").renameTo(new File("C:\\DropshipBot\\Data\\activelistings\\activelistings.txt"));
+}
+	
+public static void replaceFileWithFile(String oldfile,String newfile) {
+	new File(oldfile).delete();
+	new File(newfile).renameTo(new File(oldfile));
+
+}
+
+public static String WhichPartOfStringWithinArray(String s, String[] arr) {
+	for(String x:arr) {
+		if(s.contains(x)) {
+			return x;
+		}
+		else {
+			continue;
+		}
+	}
+	return "";
+}
+
+public static void writeOnLineNumber(String val,String filename,int line_number)throws Exception{
+	BufferedReader buf_r =  new BufferedReader(new FileReader(filename+".txt"));
+	BufferedWriter buf_w = new BufferedWriter(new FileWriter(filename+"tmp.txt"));
+	String line;
+	int i=0;
+	if(i==line_number) {
+		buf_w.write(val);
+	}
+	while((line = buf_r.readLine()) != null){
+		if(i==line_number) {
+			buf_w.write(val);
+		}
+		else {
+			buf_w.write(line);
+			buf_w.newLine();
+		}
+			
+		
+	}
+	buf_w.close();
+	buf_r.close();
+	new File(filename+".txt").delete();
+	new File(filename+"tmp.txt").renameTo(new File(filename+".txt"));
+}
+	
+
+                                                        
+                                                       
+                                                
+                                                
+                                                    
+                    
+}
