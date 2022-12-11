@@ -1,0 +1,536 @@
+package selenium_methods;
+import java.io.BufferedReader;		
+import java.io.File;		
+import java.io.FileReader;		
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.io.BufferedWriter; 
+import java.io.File; 
+import java.io.FileWriter;
+import java.util.Set;
+
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import static org.openqa.selenium.support.locators.RelativeLocator.with;
+
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.*;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.ProfilesIni;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import generalmethod.GenMeth;
+
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import org.openqa.selenium.support.ui.FluentWait;
+
+public class SGM {
+	public static Actions moveToElementOffset(WebElement x,WebDriver driver,Actions act,int x_offset,int y_offset) {
+			int xOffset = x.getRect().getX();
+			int yOffset = x.getRect().getY();
+			act.moveByOffset(xOffset+x_offset, yOffset+y_offset);
+			return act;
+	}
+	public static WebElement getElementContainsElement(WebDriver driver,String ret_tag,String tag_one,String attr,String val) {
+		List<WebElement> list = driver.findElements(By.tagName(ret_tag));
+				
+				for(WebElement web: list) {
+					try {
+					if(web.findElement(By.tagName(tag_one)).getAttribute(attr).contains(val)) {
+						return web;
+					}
+					else {
+						continue;
+					}
+					}catch(Exception e) {}
+					
+				}
+				return null;
+		
+	}
+	public static WebDriver returnFirefoxDriver(String profile) {
+		System.setProperty("webdriver.gecko.driver", "C:\\\\WebDriver\\\\bin\\\\geckodriver.exe");
+		ProfilesIni profileobj = new ProfilesIni();
+		FirefoxOptions options2 = new FirefoxOptions();
+		FirefoxProfile myprofile = profileobj.getProfile(profile);
+		options2.setProfile(myprofile);
+		
+		WebDriver drivertwo = new FirefoxDriver(options2);
+		return drivertwo;
+	}
+	
+	public static void changeFirefoxProxy(String profile,String proxyname,String proxyport) {//NOTE: you gotta close the driver of the profile before you use this method, otherwise it wont be able to access the tmp files
+		//NEEDS TO BE WORKED ON
+			ProfilesIni profileobj = new ProfilesIni();
+			FirefoxOptions options2 = new FirefoxOptions();
+			FirefoxProfile myprofile = profileobj.getProfile(profile);
+			options2.setProfile(myprofile);
+			WebDriver drivertwo = new FirefoxDriver(options2);
+		try {
+			drivertwo.get("about:preferences");
+			SGM.InterruptForElement(0, "#connectionSettings", drivertwo).click();
+			SGM.pause(1);
+			
+			//SGM.getElementContainsVal(drivertwo, "radio", "label", "Manual proxy configuration").click();
+			SGM.InterruptForElement(0, "#networkProxyHTTP", drivertwo).sendKeys(Keys.CLEAR);
+			SGM.InterruptForElement(0, "#networkProxyHTTP", drivertwo).sendKeys(proxyname);
+			SGM.InterruptForElement(0, "#networkProxyHTTP_Port", drivertwo).sendKeys(proxyport);
+			SGM.InterruptForElement(0, "#shareAllProxies", drivertwo).click();
+			SGM.InterruptForElement(0, "#networkProxyHTTP_Port", drivertwo).sendKeys(Keys.ENTER);
+			SGM.pause(20);
+		}catch(Exception e) {
+			drivertwo.quit();
+		}
+		finally {
+			drivertwo.quit();
+		}
+		
+		
+		
+	}
+	
+	public static WebElement getSpecElement(WebDriver driver,String tag,String attribute,String value, int index) {
+		List<WebElement> retlist = driver.findElements(By.tagName(tag));
+	
+		int ret_int = 0;
+		WebElement ret = null;
+		for(WebElement x: retlist) {
+			
+			if(x.getAttribute(attribute)!=null){
+				System.out.println(x.getAttribute(attribute));
+				if(x.getAttribute(attribute).equals(value)){
+					if(ret_int==index) {
+						ret = x;
+						break;
+						
+					}
+					else {
+						ret_int+=1;
+						continue;
+					}
+				}
+				else {
+					
+					continue;
+				}
+			
+			}
+			else {
+				
+				continue;
+			}
+		}
+		return ret;
+	}
+	public static WebElement getElementContainsVal(WebDriver driver,String tagname, String attr, String val) {
+		List<WebElement> list = driver.findElements(By.tagName(tagname));
+		
+		for(WebElement web: list) {
+			try {
+			if(web.getAttribute(attr).contains(val)) {
+				return web;
+			}
+			else {
+				continue;
+			}
+			}catch(Exception e) {
+				//System.out.println("issue in reading attribute value for "+tagname+"::"+attr+"::"+val);
+			}
+			
+		}
+		return null;
+	}
+	public static WebElement elementFullText1(WebDriver driver, String tag, String text) {
+		List<WebElement> retlist = driver.findElements(By.tagName(tag));
+		WebElement ret = null;
+		for(WebElement x: retlist) {
+			if(  x.getText().equals(text)) {
+				ret = x;
+				System.out.println("FOUND <"+tag+">\""+text+"\""+"<"+tag+">");
+				break;
+				
+			}
+			else {
+				continue;
+			}
+		}
+		if(ret==null) {
+			System.out.println("DID NOT FIND <"+tag+">\""+text+"\""+"<"+tag+">");
+		}
+		return ret;
+	}
+
+public static WebElement getElementContainsVal1(WebDriver driver,String tagname, String attr, String val) {
+		List<WebElement> list = driver.findElements(By.tagName(tagname));
+		
+		for(WebElement web: list) {
+			if(web.getAttribute(attr).contains(val)) {
+				System.out.println("FOUND <"+tagname+" "+attr+"='"+val+"'>");
+				return web;
+			}
+			else {
+				continue;
+			}
+			
+		}
+		System.out.println("DID NOT FIND <"+tagname+" "+attr+"='"+val+"'>");
+		return null;
+	}
+	public static WebElement[] getElementsContainsValium(WebDriver driver,String tagname, String attr, String val) {
+		List<WebElement> list = driver.findElements(By.tagName(tagname));
+		Set<WebElement> set = new HashSet<WebElement>();
+		for(WebElement web: list) {
+			if(web.getAttribute(attr).contains(val)) {
+				System.out.println("FOUND <"+tagname+" "+attr+"='"+val+"'>");
+				set.add(web);
+			}
+			else {
+				continue;
+			}
+			
+		}
+		WebElement[] retie = new WebElement[set.size()];
+		
+			set.toArray(retie);
+		
+		return  retie;
+	}
+
+public static WebElement elementFullText(WebDriver driver, String tag, String text) {
+		List<WebElement> retlist = driver.findElements(By.tagName(tag));
+		WebElement ret = null;
+		for(WebElement x: retlist) {
+			if(  x.getText().equals(text)) {
+				ret = x;
+				System.out.println("FOUND <"+tag+">\""+text+"\""+"<"+tag+">");
+				break;
+				
+			}
+			else {
+				continue;
+			}
+		}
+		if(ret==null) {
+			System.out.println("DID NOT FIND <"+tag+">\""+text+"\""+"<"+tag+">");
+		}
+		return ret;
+	}
+	
+	
+	public static void sendAuthText(WebElement x,String str) throws Exception {
+		int wpm = 35 + ((int) Math.floor(Math.random()*(10+1)));
+		char[] arr = str.toCharArray();
+		for(char car: arr) {
+			TimeUnit.MILLISECONDS.sleep((int)(1000/(((int) Math.floor(Math.random()*((2*wpm)+1)+1)))));
+			x.sendKeys(String.valueOf(car));
+		}
+		
+	}
+	public static String getSpecElementText(WebDriver driver,String tag,String attribute,String value, int index) {
+		List<WebElement> retlist = driver.findElements(By.tagName(tag));
+	
+		int ret_int = 0;
+		String ret = "";
+		for(WebElement x: retlist) {
+			
+			if(x.getAttribute(attribute)!=null){
+				System.out.println(x.getAttribute(attribute));
+				if(x.getAttribute(attribute).equals(value)){
+					if(ret_int==index) {
+					
+						ret = x.getText();
+						break;
+						
+					}
+					else {
+						ret_int+=1;
+						continue;
+					}
+				}
+				else {
+					
+					continue;
+				}
+			
+			}
+			else {
+				
+				continue;
+			}
+		}
+		return ret;
+	}
+	public static String InterruptElementText(double timeout,String x,WebDriver driver) {
+		String ret = "";
+		WebElement poje = InterruptForElement(timeout,x,driver);
+		if(poje!=null) {
+			ret=poje.getText();
+			if(ret.isEmpty()) {
+				System.out.println("Could Not Find Element Text Or Text Is Empty");
+			}
+		}
+		else {
+			ret=ret;
+			System.out.println("Could Not Find Element");
+		}
+		return ret;
+	}
+	
+	public static WebElement InterruptForElement(double timeout,String x, WebDriver driver) {
+		try{
+			double time=0;
+			while(time<timeout) {
+	            if(driver.findElements(By.cssSelector(x)).size()>0){
+	            	break;
+	            }
+	            else{
+	            	try {
+	                    TimeUnit.MILLISECONDS.sleep(100);
+	                    time+=.1;
+	                    }
+	                    catch(Exception e) {}
+	            }
+            }
+            
+           
+			
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+		
+		WebElement ret = driver.findElement(By.cssSelector(x));
+		return ret;
+	}
+	
+	
+	public static void SaveSessionCookies(WebDriver driver, String string) {
+		try{ 
+		File file = new File("C:\\\\WebDriver\\\\cookies\\\\Cookies.data"); 
+		// Delete old file if already exists
+		file.delete(); 
+		file.createNewFile(); 
+		FileWriter file_w = new FileWriter(file); 
+		BufferedWriter Bwritecookie = new BufferedWriter(file_w); //Getting the cookie information 
+		for(Cookie ck : driver.manage().getCookies()) { 
+		Bwritecookie.write((ck.getName()+";"+ck.getValue()+";"+ck.getDomain()+";"+ck.getPath()+";"+ck.getExpiry()+";"+ck.isSecure())); 
+		Bwritecookie.newLine(); 
+		} 
+		Bwritecookie.close(); 
+		file_w.close(); 
+		}
+		catch(Exception ex) 
+		{ 
+		ex.printStackTrace(); 
+		}
+	}
+	public static void loadCookies(WebDriver driver) {
+		try{			
+		     
+	        File file = new File("C:\\\\WebDriver\\\\cookies\\\\Cookies.data");							
+	        FileReader fileReader = new FileReader(file);							
+	        BufferedReader Buffreader = new BufferedReader(fileReader);							
+	        String strline;			
+	        while((strline=Buffreader.readLine())!=null){									
+	        StringTokenizer token = new StringTokenizer(strline,";");									
+	        					
+	        String name = token.nextToken();					
+	        String value = token.nextToken();					
+	        String domain = token.nextToken();					
+	        				
+	        	
+	        Cookie ck = new Cookie(name,value,domain);	
+	        
+	        System.out.println(ck);
+	        driver.manage().addCookie(ck); // This will add the stored cookie to your current session					
+	        
+	        
+	        }	
+	        Buffreader.close();
+	        }
+		catch(Exception ex){	
+			System.out.println("POJEPOJEPOJE");
+	        ex.printStackTrace();			
+	     }
+	}
+	public static WebElement InterruptForElement_XPATH(double timeout,String x, WebDriver driver) {
+		try{
+			double time = 0;
+		
+			while(time<timeout) {
+	            if(driver.findElements(By.xpath(x)).size()>0){
+	            	break;
+	            }
+	            else{
+	            	try {
+	                    TimeUnit.MILLISECONDS.sleep(100);
+	                    time+=.1;
+	                    }
+	                    catch(Exception e) {}
+	            }
+            }
+            
+           
+			
+		}
+		catch( Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+		
+		WebElement ret = driver.findElement(By.xpath(x));
+		return ret;
+	}
+	
+	
+	public static void ClearSendKeys(WebElement x,String key) {
+		x.clear();
+		x.sendKeys(key);
+	}
+	public static WebElement elementByText(WebDriver driver, String tag, String text) {
+		List<WebElement> retlist = driver.findElements(By.tagName(tag));
+		WebElement ret = null;
+		for(WebElement x: retlist) {
+			if( x.getText().contains(text)) {
+				ret = x;
+				break;
+				
+			}
+			else {
+				continue;
+			}
+		}
+		return ret;
+	}
+	public static void pause(int x) {
+		try{
+			
+			TimeUnit.SECONDS.sleep(x);
+
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+		finally{
+		}
+            
+            
+	}
+	public static void pause(long x) {
+		try{
+
+			TimeUnit.MILLISECONDS.sleep(x);
+
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+		finally{
+		}
+            
+            
+	}
+	public static void authenticScroll(int pixels_per_milli, int length, JavascriptExecutor js) {
+		int amount_scrolled = 0;
+		while(amount_scrolled<length) {
+			js.executeScript(" window.scrollBy(0,"+pixels_per_milli+")");
+			SGM.pause((long) 1);
+			amount_scrolled+=pixels_per_milli;
+		}
+	}
+	
+	public static void loginList(WebDriver driver)throws Exception {
+		String ebay_cookies = GenMeth.getEbayCookies(driver);
+		pause(3);
+		loginBanggood(driver,"buachailbeag@gmail.com","meme1212");
+		pause(3);
+		loginAliExpress(driver,"buachailbeag@gmail.com","meme1212");
+		pause(3);
+		loginGearBest(driver,"buachailbeag@gmail.com","meme1212");
+		pause(3);
+		
+		
+	}
+	public static void loginAliExpress(WebDriver driver,String username,String password)throws Exception{
+		Actions actions = new Actions(driver);
+		driver.get("https://www.aliexpress.com");
+		SGM.pause(60);
+//        String parent=driver.getWindowHandle();
+//        InterruptForElement(10, ".btn-close", driver).click();
+//		WebElement mainMenu = driver.findElement(By.id("nav-user-account"));
+//        actions.moveToElement(mainMenu);
+//       WebElement subMenu = driver.findElement(By.className("sign-btn"));
+//    	actions.moveToElement(subMenu);
+//    	SGM.pause(2);
+//    	actions.click().build().perform();
+//    	SGM.pause(2);
+//    	Set<String> handleset =driver.getWindowHandles();
+//    	if(handleset.size()>1){
+//    		driver.switchTo().window(parent);
+//        	actions.moveToElement(subMenu);
+//        	SGM.pause(2);
+//        	actions.click().build().perform();	
+//    	}
+//    	WebElement email_input = new WebDriverWait(driver,20).until(e ->  driver.findElement(By.id("fm-login-id")));
+////    	email_input.sendKeys(username);
+//    	sendAuthText(email_input, username);
+//        WebElement pass_word = driver.findElement(By.id("fm-login-password"));
+//        sendAuthText(pass_word,password);
+////        pass_word.sendKeys(password);
+//        driver.findElement(By.cssSelector("[class=fm-button]")).click();
+//        SGM.pause(5);
+	}
+	public static void loginBanggood(WebDriver driver,String username,String password) {
+		driver.get("https://banggood.com");
+		Actions actions = new Actions(driver);
+    	SGM.InterruptForElement(10,".newuser-close", driver).click();
+		WebElement user_header = SGM.InterruptForElement(10,".header-user-icon", driver);
+    	actions.moveToElement(user_header);
+    	WebElement subMenu = driver.findElement(By.className("header-user-signBtn"));
+    	actions.moveToElement(subMenu);
+    	actions.click().build().perform();
+    	SGM.InterruptForElement(10,"#login-email", driver).sendKeys(username);
+    	SGM.InterruptForElement(10,"#login-pwd", driver).sendKeys(password);
+    	SGM.InterruptForElement(10,"#login-submit", driver).click();
+   
+		
+	}
+	public static void loginGearBest(WebDriver driver,String username,String password) {
+		driver.get("https://www.gearbest.com/");
+		SGM.InterruptForElement_XPATH(5, "/html/body/div[6]/span[1]/a", driver).click();
+		Actions actions = new Actions(driver);
+		actions.moveToElement(SGM.InterruptForElement_XPATH(5, "//div[1]/div[2]/div/div[2]/div[1]/span[2]", driver));
+		actions.moveToElement(SGM.InterruptForElement_XPATH(5, "//html/body/div[1]/div[2]/div/div[2]/div[1]/div/div/div/a[1]",driver));
+		actions.click().build().perform();
+		SGM.InterruptForElement(5,"#email", driver).sendKeys(username);
+		SGM.InterruptForElement(5,"#password", driver).sendKeys(password+ Keys.ENTER);
+	}
+	public static void loginEbay(WebDriver driver,String username,String password) {
+		driver.get("https://www.ebay.ie");
+		driver.get("https://signin.ebay.ie/ws/eBayISAPI.dll?SignIn&ru=https%3A%2F%2Fwww.ebay.ie%2F");
+		SGM.InterruptForElement(3000, "#userid", driver).sendKeys(username);
+		SGM.pause(1);
+		SGM.InterruptForElement(30, "#userid", driver).sendKeys(Keys.ENTER);
+		SGM.pause(1);
+		SGM.pause(1);
+		SGM.InterruptForElement(5, "#pass", driver).sendKeys(password);
+		SGM.pause(1);
+		SGM.InterruptForElement(30, "#pass", driver).sendKeys(Keys.ENTER);
+		}
+	}
+
