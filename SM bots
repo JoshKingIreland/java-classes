@@ -1,0 +1,1078 @@
+package selenium_methods;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.interactions.Actions;
+
+import SMedia.Twitter;
+import SMedia.Youtube;
+import generalmethod.GenMeth;
+import generalmethod.WSF;
+import generalmethod.dissertationcode;
+
+public class HTTPcollectors {
+	
+	public final static Map<String,String> usergens_proxies = new HashMap<String,String>(){{
+		put("eire_abodes","proxyuser2");
+		put("irish_politics_daily","proxyuser1");
+		put("ireland_rentals","proxyuser4");
+		put("eu_politics_daily","proxyuser5");
+		put("cheap_irish_homes","proxyuser7");
+	}};
+	
+	public final static Map<String,String> usergens_webserverfolders = new HashMap<String,String>(){{
+		put("eire_abodes","lovely_irish_homes");
+		put("irish_politics_daily","irish_politics_daily");
+		put("ireland_rentals","irish_rentals");
+		put("eu_politics_daily","eu_politics_daily");
+		put("cheap_irish_homes","cheap_irish_homes");
+	}};
+	
+	
+	
+	
+	public final static Map<String,String[]> usergens_hashtags = new HashMap<String,String[]>(){{
+		put("eire_abodes",new String[] {
+			"#irishhomes ",
+			"#irishhouses ",
+			"#ireland ",
+			"#forsale ",
+			"#irishproperty ",
+			"#dreamhome ",
+			"#house ",
+			"#realestate ",
+			"#home ",
+			"#inspiration ",
+			"#interiordesigner ",
+			"#homes ",
+			"#homesforsale ",
+			"#realestatelife ",
+			"#instahome ",
+			"#realestateinvestor",
+			"#realestate",
+			"#realestateagent",
+			"#RealEstateInvestor",
+			"#realestatelife",
+			"#realestateinvesting",
+			"#realestateinvestment",
+			"#propertymarket",
+			"#propertymarketing",
+			"#propertymarketingspecialist",
+			"#propertymarketsgroup ",
+			"#propertysearch",
+			"#propertysales",
+			"#propertyfinder",
+			"#PropertyListing"
+			});
+put("cheap_irish_homes",new String[]{
+			"#irishhomes ",
+			"#irishhouses ",
+			"#ireland ",
+			"#forsale ",
+			"#irishproperty ",
+			"#dreamhome ",
+			"#house ",
+			"#realestate ",
+			"#home ",
+			"#inspiration ",
+			"#interiordesigner ",
+			"#homes ",
+			"#homesforsale ",
+			"#realestatelife ",
+			"#instahome ",
+			"#realestateinvestor",
+			"#realestate",
+			"#realestateagent",
+			"#RealEstateInvestor",
+			"#realestatelife",
+			"#realestateinvesting",
+			"#realestateinvestment",
+			"#propertymarket",
+			"#propertymarketing",
+			"#propertymarketingspecialist",
+			"#propertymarketsgroup ",
+			"#propertysearch",
+			"#propertysales",
+			"#propertyfinder",
+			"#PropertyListing"
+			});
+put("irish_politics_daily",new String[]{
+			"#Ireland ",
+			"#IrishPolitics ",
+			"#Politics ",
+			"#dail ",
+			"#currentaffairs ",
+			"#political ",
+			"#news ",
+			"#irishnews ",
+			"#irelandnews ",
+			"#daily ",
+			"#irish ",
+			"#oireachtas",
+			"#PoliticsMatter ",
+			"#politicsdaily",
+			"#politicsNow",
+			"#politicsofinstagram",
+			"#politico",
+			"#realpolitik",
+			"#politik",
+			"#economics101 ",
+			"#economicsandbusiness ",
+			"#economicsandfinance",
+			"#economicsystem "
+			});
+put("eu_politics_daily",new String[]{
+			"#EU ",
+			"#eupolitics ",
+			"#europe ",
+			"#brussels ",
+			"#euparliament ",
+			"#eup ",
+			"#eucommission ",
+			"#europeanpolitics ",
+			"#eunews ",
+			"#europeannews ",
+			"#currentaffairs ",
+			"#europe",
+			"#europe",
+			"#europa",
+			"#euro",
+			"#european",
+			"#EEA",
+			"#Euros",
+			"#PoliticsMatter ",
+			"#politicsdaily",
+			"#politicsNow",
+			"#politicsofinstagram",
+			"#politico",
+			"#realpolitik",
+			"#politik",
+			"#economics101 ",
+			"#economicsandbusiness ",
+			"#economicsandfinance",
+			"#economicsystem "
+			});
+put("ireland_rentals",new String[]{
+			"#rent ",
+			"#irishrent ",
+			"#rentinireland ",
+			"#irishhouses ",
+			"#ireland ",
+			"#propertylettings ",
+			"#renting ",
+			"#property ",
+			"#listing ",
+			"#selling",
+			"#realestate",
+			"#realestateagent",
+			"#RealEstateInvestor",
+			"#realestatelife",
+			"#realestateinvesting",
+			"#realestateinvestment",
+			"#propertymarket",
+			"#propertymarketing",
+			"#propertymarketingspecialist",
+			"#propertymarketsgroup ",
+			"#propertysearch",
+			"#propertysales",
+			"#propertyfinder",
+			"#PropertyListing"
+			});
+	}};
+
+	public static String returnRandomHashtagString(String account_name,int hashtag_amount) {
+		String ret="";
+		
+		String[] arr = usergens_hashtags.get(account_name);
+		
+		Set<String> index_set = new HashSet<String>();
+		while(index_set.size()<hashtag_amount) {
+			index_set.add(String.valueOf((int)Math.floor(Math.random()*(arr.length))));
+		}
+		for(String x:index_set) {
+			ret+=arr[Integer.parseInt(x)]+" ";
+		}
+		
+		return ret;
+	}
+	
+	public final static Map<String,String[]> usergens_followlist = new HashMap<String,String[]>(){{
+		put("eire_abodes",GenMeth.fileLinesAsArray("C:\\DESP\\user_content\\eire_abodes\\affil_accounts.txt"));
+		put("cheap_irish_homes",GenMeth.fileLinesAsArray("C:\\DESP\\user_content\\cheap_irish_homes\\affil_accounts.txt"));
+		put("irish_politics_daily",GenMeth.fileLinesAsArray("C:\\DESP\\user_content\\irish_politics_daily\\affil_accounts.txt"));
+		put("eu_politics_daily",GenMeth.fileLinesAsArray("C:\\DESP\\user_content\\eu_politics_daily\\affil_accounts.txt"));
+		put("ireland_rentals",GenMeth.fileLinesAsArray("C:\\DESP\\user_content\\ireland_rentals\\affil_accounts.txt"));
+	}};
+	
+	public final static String[] amenities = new String[]{
+			"pool",
+			"coast",
+			"gym",
+			"park",
+			"shopping center",
+			"town",
+			//"city",
+			"lake",
+			"train station",
+			"university",
+			"secondary school",
+			//"shop",
+			"medical center",
+			"playschool",
+			"community center",
+			//"nightclub",
+			"pub",
+			//"forest"
+	};
+	
+//		
+//		//daftBuyCollect();
+//		daftRentCollect();
+//	}
+	public static Map<String,String> returnTopAmenities(String address) throws Exception {
+		Map<String,String> amenities_times = new HashMap<String,String>();
+		for(String x:amenities) {
+			String[] ret = dissertationcode.returnTIMEDIST(address,x);
+			if(ret[0]!=null&&!ret[0].isEmpty()&&!ret[0].equals(" ")) {
+				try {
+					
+					int max_allowed_time = 20;
+					if(!ret[0].contains("hr")) {
+						int time_mins = Integer.parseInt(ret[0].replaceAll("[^0-9]", "").trim());
+						if(time_mins<max_allowed_time) {
+							amenities_times.put(x,ret[0].replaceAll("[^0-9]", "").trim());
+							System.out.println("F"+ret[0].replaceAll("[^0-9]", "").trim());
+						}
+					}
+					
+					
+				}
+				catch(Exception e) {
+					
+				}
+			}
+			
+			//System.out.println(x);
+			System.out.println("time: "+ret[0]);
+			
+			System.out.println(" ");
+			//System.out.println("dist: "+ret[1]);
+			//System.out.println("full code: "+ret[2]);
+		}
+		//Map<String,String> zed = GenMeth.returnTopEntriesMap(amenities_times,amenities_times.size());
+		//for(Entry<String,String> thing:amenities_times.entrySet()) {
+		//	System.out.println(thing.getKey()+": "+thing.getValue()+" minutes away");
+		//}
+		for(Entry<String,String> thing:amenities_times.entrySet()) {
+			System.out.println(thing.getKey()+": "+thing.getValue()+" minutes away");
+		}
+		return amenities_times;
+		
+		
+	}
+
+	
+	public static void main(String[] nargs) throws Exception {
+		 Scanner myObj = new Scanner(System.in);  // Create a Scanner object
+		 System.out.println("How Many Hours Until We Start?");
+
+		 String hours_till_start = myObj.nextLine();  // Read user input
+		 System.out.println("How Many Hours Between Posts?");
+		 String hours_till_next = myObj.nextLine();
+		 if(hours_till_start.equals("0")) {
+			 System.out.println("We Will Start Now,");
+			 System.out.println("And We Will Post Every "+hours_till_next+" Hours");
+		 }
+		 else {
+			 System.out.println("We Will Start In "+hours_till_start+" Hours,");
+			 System.out.println("And We Will Post Every "+hours_till_next+" Hours");
+		 }
+		 
+		
+		long start = System.currentTimeMillis();
+		int hour = Integer.parseInt(hours_till_start);
+		while(true) {
+		
+		//for(Entry<String,String> account:IG.account_igname.entrySet()) {
+			if(hour%Integer.parseInt(hours_till_next)==0) {
+					try {
+						uploadToPages();
+					}catch(Exception e) {
+						System.out.println("ERROR: "+e.toString());
+						System.out.println("ERROR: "+e.toString());
+						System.out.println("Description: "+e.getMessage());
+					}
+			}
+		
+					
+					if(System.currentTimeMillis()-start>=3600000) {
+						start = System.currentTimeMillis();
+						hour+=1;
+						hour%=24;
+					}
+				else {
+					//Youtube.UpdateAccountAnalytics();
+					System.out.println("Finished by the hour too quickly, gonna sleep for "+((3600000-(System.currentTimeMillis()-start))/1000)+" Seconds.");
+					TimeUnit.MILLISECONDS.sleep(3600000-(System.currentTimeMillis()-start));
+					start = System.currentTimeMillis();
+					hour+=1;
+					hour%=24;
+				}
+	}
+	}
+
+	public static void uploadToPages() throws Exception {
+//		collectEurActive();
+//	}
+//	public static void maind(String[] nargs) throws Exception {
+		
+		for(Entry<String,String> x:usergens_proxies.entrySet()) {
+			WebDriver driver = SGM.returnFirefoxDriver(x.getValue());
+		try {
+			String article_link = "";
+			String description= "";
+			String title = "";
+			String end_caption= "";
+			String[] media= new String[1];
+			
+			SGM.pause(2);
+			String[] args = new String[1];
+			switch(x.getKey()) {
+			case "eire_abodes":
+					args = daftBuyCollect("eire_abodes","https://www.daft.ie/property-for-sale/ireland?salePrice_to=600000&sort=publishDateDesc&salePrice_from=200000&propertyType=detached-houses&propertyType=townhouses&numBeds_from=3");
+					article_link = args[0];
+					title = "Property for sale. Price is "+args[4]+", there are "+ args[1]+" Bedrooms and "+args[2]+" Bathrooms.";
+					description = args[3];
+					end_caption = /*"Read Full Article At: "+article_link+" "+*/returnRandomHashtagString(x.getKey(),10);
+					media = args[6].split("\\,");
+					System.out.println("title: "+title);
+					System.out.println("description: "+description);
+					System.out.println("end caption: "+end_caption);
+				
+					break;
+			 case "cheap_irish_homes":
+					args = daftBuyCollect("cheap_irish_homes","https://www.daft.ie/property-for-sale/ireland?pageSize=50&sort=publishDateDesc&numBeds_from=3&salePrice_to=150000&propertyType=detached-houses&propertyType=townhouses&propertyType=bungalows");
+					article_link = args[0];
+					title = "Property for sale. Price is "+args[4]+", there are "+ args[1]+" Bedrooms and "+args[2]+" Bathrooms.";
+					description = args[3];
+					end_caption = /*"Read Full Article At: "+article_link+" "+*/returnRandomHashtagString(x.getKey(),10);
+					media = args[6].split("\\,");
+					System.out.println("title: "+title);
+					System.out.println("description: "+description);
+					System.out.println("end caption: "+end_caption);
+					
+				    break;
+			  case "irish_politics_daily":
+					args = CollectIrishIndependent();
+
+					article_link = args[0];
+					title = args[2];
+					description = args[4];
+					end_caption = /*"Read Full Article At: "+article_link+" "+*/returnRandomHashtagString(x.getKey(),10);
+					media = new String[] {args[1]};
+					System.out.println("title: "+title);
+					System.out.println("description: "+description);
+					System.out.println("end caption: "+end_caption);
+					
+				    break;
+			case "eu_politics_daily":
+					args = collectEurActive();
+
+					article_link = args[0];
+					title = args[2];
+					description = args[4];
+					end_caption = /*"Read Full Article At: "+article_link+" "+*/returnRandomHashtagString(x.getKey(),10);
+					media = new String[] {args[1]};
+					System.out.println("title: "+title);
+					System.out.println("description: "+description);
+					System.out.println("end caption: "+end_caption);
+					
+				    break;
+			  case "ireland_rentals":
+				args = daftRentCollect();
+				title = "Property for sale. Price is "+args[4]+", there are "+ args[1]+" Bedrooms and "+args[2]+" Bathrooms.";
+				article_link = args[0];
+				description = args[3];
+				end_caption = /*"Read Full Article At: "+article_link+" "+*/returnRandomHashtagString(x.getKey(),10);
+				media = args[6].split("\\,");
+				System.out.println("title: "+title);
+				System.out.println("description: "+description);
+				System.out.println("end caption: "+end_caption);
+				
+				break; 
+			  default:
+				  break; 
+			}
+			try {
+				if(article_link!=null||!article_link.equals(null)||!article_link.isEmpty()) {
+				 try {
+					 	try {
+					 		String[] descrip_sentences = description.split("\\.");
+					 		if(descrip_sentences.length>5) {
+					 			description ="";
+					 			for(String y:descrip_sentences) {
+					 				description = description.concat(y+". ");
+					 			}
+					 		}
+					 		else {
+					 			description = description;
+					 		}
+					 	}
+					 	catch(Exception e) {
+					 		
+					 	}
+						
+						//int cutoffindex = (int) Math.floor((descrip_sentences.length-(descrip_sentences.length%3))/3);
+						String Igdesc=description;
+						//for(int i =0;i<(cutoffindex);++i) {
+						//	 Igdesc +=descrip_sentences[i].trim()+".";
+						//}
+						SGM.pause(15);
+						
+					try {	
+						
+						if(media.length>1){
+							String[] multimedia = new String[1];
+							if((new File("C:\\DESP\\user_content\\"+x.getKey()+"\\"+x.getKey()+"(2).png")).exists()) {
+								 multimedia = new String[] {
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\"+x.getKey()+".png",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\"+x.getKey()+"(2).png",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\1.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\2.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\3.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\4.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\5.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\6.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\7.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\8.jpg"
+										};
+							}
+							else {
+								 multimedia = new String[] {
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\"+x.getKey()+".png",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\1.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\2.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\3.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\4.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\5.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\6.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\7.jpg",
+										"C:\\DESP\\user_content\\"+x.getKey()+"\\8.jpg"
+										};
+							}
+							
+							IG.makePost( driver,multimedia,  end_caption/*+ "\n\""+Igdesc+"\""*/);
+							//IG.followSomePeople(15,usergens_followlist.get(x.getKey()),driver);
+						}
+						else{
+						
+						
+							String[] multimedia = new String[] {
+									"C:\\DESP\\user_content\\"+x.getKey()+"\\"+x.getKey()+".png"
+								};
+							IG.makePost( driver,multimedia, end_caption/*+ "\n\""+Igdesc+"\""*/);
+						}
+						
+						
+					}catch(Exception e) {System.out.println("ERROR: "+e.toString());System.out.println("ERROR: "+e.toString());System.out.println("Description: "+e.getMessage());}
+					try {
+							String[] multimedia = new String[] {
+								"C:\\DESP\\user_content\\"+x.getKey()+"\\reel_content\\test1.mp4"
+							};
+							SGM.pause(120);
+							IG.makePost( driver,multimedia, end_caption/*+ "\n\""+Igdesc+"\""*/);
+							
+					}catch(Exception e) {System.out.println("ERROR: "+e.toString());System.out.println("ERROR: "+e.toString());System.out.println("Description: "+e.getMessage());}	
+							
+							
+							//IG.followSomePeople(15,usergens_followlist.get(x.getKey()),driver);
+							
+							
+							
+							
+//						}
+						
+					
+					}catch(Exception e) {System.out.println("ERROR: "+e.toString());System.out.println("ERROR: "+e.toString());System.out.println("Description: "+e.getMessage());}
+				 
+//				 	try {
+//				 		//IG.followSomePeople(10,usergens_followlist.get(x.getKey()),driver);}
+//				 	catch(Exception e) {}
+				
+					try {
+						
+						Twitter.upload("C:\\DESP\\user_content\\"+x.getKey()+"\\"+x.getKey()+".png","\""+title+"\""+end_caption,driver);
+					
+					}catch(Exception e) {System.out.println("ERROR: "+e.toString());System.out.println("ERROR: "+e.toString());System.out.println("Description: "+e.getMessage());}
+					try {
+						String id = String.valueOf(System.currentTimeMillis())+"_id_string";
+						String page = usergens_webserverfolders.get(x.getKey());
+						GenMeth.PNG_to_JPG(
+								"C:\\DESP\\user_content\\"+x.getKey()+"\\"+x.getKey()+".png",
+								"C:\\DESP\\user_content\\"+x.getKey()+"\\"+id+".jpg"
+								);
+						
+						WSF.upload_Linksofbio_Post(
+								"C:\\DESP\\user_content\\"+x.getKey()+"\\"+id+".jpg",
+								"",
+								description,
+								id,
+								article_link,
+								page
+								);
+						
+						 File myObj = new File("C:\\DESP\\user_content\\"+x.getKey()+"\\"+id+".jpg"); 
+						 myObj.delete();
+						
+					}catch(Exception e) {System.out.println("ERROR: "+e.toString());System.out.println("ERROR: "+e.toString());System.out.println("Description: "+e.getMessage());}
+				
+				
+				}
+				else {
+					System.out.println("unable to find a new article");
+				}
+			}catch(Exception e) {driver.quit();}
+			finally {
+				driver.quit();
+			}
+			
+			}catch(Exception e) {driver.quit();}
+		}
+		
+		/*
+		args = CollectIrishIndependent();
+		try {
+			try {
+				String Igdesc = args[4].split("\\.")[0].trim()+"."+args[4].split("\\.")[1].trim()+"."+args[4].split("\\.")[2].trim()+"."+args[4].split("\\.")[3].trim()+".";
+				IG.makePost( driver,new String[] {"C:\\DESP\\user_content\\irish_politics_daily\\irish_politics_daily.png"}, "\""+Igdesc+"\"READ FULL ARTICLE AT "+args[0]+"#Ireland #IrishPolitics #Politics");
+			}
+			catch(Exception e) {
+				System.out.println("ERROR: "+e.toString());
+				System.out.println("ERROR: "+e.toString());
+				System.out.println("Description: "+e.getMessage());
+			}
+			try {
+				Twitter.upload("C:\\DESP\\user_content\\irish_politics_daily\\irish_politics_daily.png","\""+args[4].split("\\.")[0].trim()+"\" READ FULL ARTICLE AT "+args[0]+" #Ireland #IrishPolitics #Politics",driver);
+			}
+			catch(Exception e) {
+				System.out.println("ERROR: "+e.toString());
+				System.out.println("ERROR: "+e.toString());
+				System.out.println("Description: "+e.getMessage());
+			}
+		}
+		catch(Exception e) {
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+			driver.quit();
+		}
+		finally {
+			driver.quit();
+		}
+		*/
+		
+		//Process p = Runtime.getRuntime().exec(new String[]{"cmd.exe","cd C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python38","python pillowtest.py"});
+		//Process p = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\irish_politics_daily\\imgprocess.bat");
+//		ProcessBuilder processBuilder = new ProcessBuilder("python", "C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python38\\moviepytest.py");
+//	    processBuilder.redirectErrorStream(true);
+//
+//	    Process process = processBuilder.start();
+		//daftRentCollect();
+		
+		//daftBuyCollect();
+		//GenMeth.writeWholeToFile(GenMeth.sendGET("https://www.independent.ie/irish-news/politics/paschal-donohoe-says-it-is-unconscionable-and-wrong-that-small-businesses-fear-going-bust-while-energy-firms-make-huge-profits-41955555.html"),"C:\\DESP\\TMPFILE.txt" );
+		
+	}
+	
+	public static String[] collectEurActive() throws Exception {
+		String[] ret = new String[5];
+		String data = GenMeth.sendGET("https://www.euractiv.com/sections/politics/?type_filter=news");	
+		data = data.split("ea-archive-body")[1].split("nav-pills")[0];
+		String[] articlelinks = GenMeth.find_multiple_elements(data,Pattern.compile("https://www.euractiv.com/section/").matcher(data),"\"  ","",0);
+		for(String article:articlelinks) {
+			System.out.println(article);
+			if(GenMeth.isEntryinfile(article, "C:\\DESP\\user_content\\eu_politics_daily\\article_archive.txt")) {
+				continue;
+			}
+			
+//			else if(article.contains("/politics/")) {
+//				continue;
+//			}
+			else {
+				BufferedWriter x = new BufferedWriter(new FileWriter("C:\\DESP\\user_content\\eu_politics_daily\\imgdata.txt"));
+				
+			System.out.println(article);
+			data = GenMeth.sendGET(article);
+			String title = GenMeth.webTextConvert(data.split("title>")[1].split("&#8211")[0].replaceAll("&#[0-9]*;", "\""));
+			String medialink = data.split("ea-article-featured-image")[1].split("ea-article-body")[0];
+			medialink = GenMeth.find_single_element(medialink,0,Pattern.compile("https://www.euractiv.com/wp-content/").matcher(medialink),"\"  ","",0);
+			String article_content = data.split("ea-article-body-content")[2].split("ea-article-footer")[0];
+			article_content = GenMeth.webTextConvert(GenMeth.removeEncased(article_content, '<', '>')).replaceAll("&#[0-9]*;", "\"");
+			System.out.println(article);
+			System.out.println(title);
+			System.out.println(medialink);
+			System.out.println(article_content);
+			
+			x.append(article);
+			ret[0] = article;
+			x.newLine();
+			x.append(medialink);
+			ret[1] =medialink ;
+			x.newLine();
+			x.append(title.trim());
+			ret[2] =title.trim() ;
+			x.newLine();
+			x.append("eu_politics_daily");
+			ret[3] = "eu_politics_daily";
+			x.newLine();
+			//x.append(asciiEncodedString[1]+"."+asciiEncodedString[2]+"."+asciiEncodedString[3]+".");
+			//ret[4] =asciiEncodedString[1]+"."+asciiEncodedString[2]+"."+asciiEncodedString[3]+"." ;
+			String[] asciiEncodedString = article_content.split("\\.");
+			article_content = "";
+			for(int u=1;u<4;++u) {
+				if(u==1) {
+					article_content= article_content.concat(". "+asciiEncodedString[u]);
+				}
+				else {
+					article_content= article_content.concat(asciiEncodedString[u]);
+				}
+				
+			}
+			x.append(article_content);
+			ret[4] =article_content ;
+			x.newLine();
+			x.close();
+			Process p = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\eu_politics_daily\\imgprocess.bat");
+			Process p2 = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\eu_politics_daily\\reel_content\\reel_process.bat");
+			GenMeth.AppendToFile(article, "C:\\DESP\\user_content\\eu_politics_daily\\article_archive.txt");
+			break;
+			
+		}
+		}
+		//GenMeth.writeWholeToFile(data, "C:\\DESP\\TMPfile.txt");
+		return ret;
+	}
+	
+	
+	
+	
+	
+	public static String[] daftBuyCollect(String accountname, String url) throws Exception {
+		String[] ret = new String[15];
+		
+		//COLLECT MOST RECENT LISTING LINKS
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+		String data = GenMeth.sendGET(url);
+		String[] article_links = GenMeth.find_multiple_elements(data,Pattern.compile("a href=\"/for-sale/").matcher(data),"\"  ","",8);
+		for(String article:article_links) {
+			System.out.println("https://www.daft.ie"+article);
+		}
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+		//COLLECT DATA ON THOSE LINKS
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		for(String article:article_links) {
+			if(GenMeth.isEntryinfile(article, "C:\\DESP\\user_content\\"+accountname+"\\article_archive.txt")) {
+				continue;
+			}
+			else {
+				
+				try {
+					GenMeth.AppendToFile(article, "C:\\DESP\\user_content\\"+accountname+"\\article_archive.txt");
+					BufferedWriter x = new BufferedWriter(new FileWriter("C:\\DESP\\user_content\\"+accountname+"\\imgdata.txt"));
+					
+					System.out.println("https://www.daft.ie"+article);
+					
+					String article_data = GenMeth.sendGET("https://www.daft.ie"+article);
+					
+					//COLLECT IMAGES
+					String media_string = article_data.split("\"images\":")[1];
+					String media_writetofile = "";
+					String[] media_links = media_string.split("size");
+					for(String media:media_links) {
+						if(media.contains("1440x960")&&media.contains("media")) {
+							media_writetofile+=media.split("\"")[2]+",";
+						}
+						
+					}
+					String[] links = media_writetofile.split("\\,");
+					if(links.length>=9) {
+						int iter =(int) (links.length-(links.length%9))/9;
+						System.out.println(iter);
+						for(int i =1;i<9;++i) {
+							GenMeth.downloadOnlineNew(links[i*iter], "C:\\DESP\\user_content\\"+accountname+"\\"+i+".jpg");
+						}
+						//COLLECT BEDS/BATHS/DESCIRPTION/PRICE/ADDRESS
+						String beds = GenMeth.find_single_element(article_data,0,Pattern.compile("data-testid=\"beds").matcher(article_data),"</  ","",0).split(">")[1].replaceAll("[^0-9]", "");
+						String baths = GenMeth.find_single_element(article_data,0,Pattern.compile("data-testid=\"baths").matcher(article_data),"</  ","",0).split(">")[1].replaceAll("[^0-9]", "");
+						String descrip =    GenMeth.webTextConvert(GenMeth.find_single_element(article_data,0,Pattern.compile("description\":").matcher(article_data),"\"  ","",14));
+						String[] descrip_sentences = descrip.split("\\.");
+						descrip="";
+						if(descrip_sentences.length>=5) {
+							for(int u=1;u<5;++u) {
+								descrip+=descrip_sentences[u]+".";
+							}
+						}
+						else {
+							for(int u=1;u<descrip_sentences.length;++u) {
+								descrip+=descrip_sentences[u]+".";
+							}
+						}
+						
+						String price = GenMeth.find_single_element(article_data,1,Pattern.compile("price\":").matcher(article_data),",  ","",0).replaceAll("[^0-9]", "");
+						String address_string = GenMeth.webTextConvert(GenMeth.find_single_element(article_data,0,Pattern.compile("\"title\"").matcher(article_data),"\"  ","",9));
+						String[] address = address_string.split("\\,");
+						System.out.println(beds);
+						System.out.println(baths);
+						System.out.println(descrip);
+								System.out.println(price);
+										System.out.println(address);
+										
+						x.append("https://www.daft.ie"+article);
+						x.newLine();
+						x.append(beds);
+						x.newLine();
+						x.append(baths);
+						x.newLine();
+						x.append(descrip.replaceAll("\n", "").replaceAll("\\\\n", "").replaceAll("\\\\u0026", "").replaceAll("\u0026", ""));
+						x.newLine();
+						x.append(price);
+						x.newLine();
+						x.append(address[address.length-2].trim()+","+address[address.length-1]);
+						x.newLine();
+						x.append(media_writetofile);
+						x.newLine();				
+						x.append("Property For Sale At "+address[0]+","+address[1]+". Price Is "+price+" Euros. Find More Information At The Link: daft.ie"+article);
+						x.newLine();
+						
+						ret[0] = "https://www.daft.ie"+article ;
+						ret[1] = beds;
+						ret[2] = baths;
+						ret[3] = descrip.replaceAll("\n", "").replaceAll("\\\\n", "").replaceAll("\\\\u0026", "").replaceAll("\u0026", "") ;
+						ret[4] = price;
+						ret[5] = address[address.length-2].trim()+","+address[address.length-1];
+						ret[6] = media_writetofile;
+						ret[7] = "Property For Sale At "+address[0]+","+address[1]+". Price Is "+price+" Euros. Find More Information At The Link: daft.ie"+article;
+						
+						try {
+							Map<String,String> amen_times = returnTopAmenities(address_string);
+							int ite = 8;
+							for(Entry<String,String> i:amen_times.entrySet()) {
+								try {
+									//if(Integer.parseInt(i.getValue().trim())<100) {
+										String putin = i.getKey()+": "+i.getValue()+" minutes";
+										x.append(putin);
+										x.newLine();
+										ret[ite] = putin;
+										ite+=1;
+									//}
+									//else {
+										
+									//}
+									
+								}
+								catch(Exception e) {
+									System.out.println("ISSUE IN AMENITIESssss");
+								}
+							}
+						}
+						catch(Exception e) {
+							System.out.println("ISSUE IN AMENITIES");
+						}
+						
+										
+						x.close();		
+										
+										
+						
+						Process p = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\"+accountname+"\\imgprocess.bat");
+						Process p2 = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\"+accountname+"\\reel_content\\reel_process.bat");
+						break;
+					}
+					else {
+						x.close();
+						GenMeth.AppendToFile(article, "C:\\DESP\\user_content\\"+accountname+"\\article_archive.txt");
+						continue;
+					}
+				}
+				catch(Exception e) {
+					continue;
+				}
+			}
+			
+		}
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+		
+		return ret;
+		//System.out.println(data);
+	}
+
+	
+	
+public static String[] daftRentCollect() throws Exception {
+		String[] ret = new String[8];
+		
+		//COLLECT MOST RECENT LISTING LINKS
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		
+		String data = "";
+		try {		
+			data=	GenMeth.sendGET("https://www.daft.ie/property-for-rent/dublin?sort=publishDateDesc");
+		}
+		catch(Exception e) {
+			System.out.println("issue in loading daft rent search page");
+		}
+		String[] article_links = GenMeth.find_multiple_elements(data,Pattern.compile("a href=\"/for-rent/").matcher(data),"\"  ","",8);
+		for(String article:article_links) {
+			System.out.println("https://www.daft.ie"+article);
+		}
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+		//COLLECT DATA ON THOSE LINKS
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		for(String article:article_links) {
+			if(GenMeth.isEntryinfile(article, "C:\\DESP\\user_content\\ireland_rentals\\article_archive.txt")) {
+				continue;
+			}
+			else {
+				try {
+					GenMeth.AppendToFile(article, "C:\\DESP\\user_content\\ireland_rentals\\article_archive.txt");
+					BufferedWriter x = new BufferedWriter(new FileWriter("C:\\DESP\\user_content\\ireland_rentals\\imgdata.txt"));
+					
+					System.out.println("https://www.daft.ie"+article);
+					
+					String article_data = GenMeth.sendGET("https://www.daft.ie"+article);
+					
+					//COLLECT IMAGES
+					String media_string = article_data.split("\"images\":")[1];
+					String media_writetofile = "";
+					String[] media_links = media_string.split("size");
+					for(String media:media_links) {
+						if(media.contains("1440x960")&&media.contains("media")) {
+							media_writetofile+=media.split("\"")[2]+",";
+						}
+						
+					}
+					String[] links = media_writetofile.split("\\,");
+					if(links.length>=9) {
+						int iter =(int) (links.length-(links.length%9))/9;
+						System.out.println(iter);
+						for(int i =1;i<9;++i) {
+							GenMeth.downloadOnlineNew(links[i*iter], "C:\\DESP\\user_content\\ireland_rentals\\"+i+".jpg");
+						}
+						//COLLECT BEDS/BATHS/DESCIRPTION/PRICE/ADDRESS
+						GenMeth.writeWholeToFile(article_data, "C:\\DESP\\TMPfile.txt");
+						String beds = GenMeth.find_single_element(article_data,0,Pattern.compile("data-testid=\"beds").matcher(article_data),"</  ","",0).split(">")[1].replaceAll("[^0-9]", "");
+						String baths = GenMeth.find_single_element(article_data,0,Pattern.compile("data-testid=\"baths").matcher(article_data),"</  ","",0).split(">")[1].replaceAll("[^0-9]", "");
+						String descrip =    GenMeth.webTextConvert(GenMeth.find_single_element(article_data,0,Pattern.compile("description\":").matcher(article_data),"\"  ","",14)).replaceAll("\n", "").replaceAll("\\\\n", "").replaceAll("\\\\u0026", "").replaceAll("\u0026", "");
+						String price = GenMeth.find_single_element(article_data,1,Pattern.compile("price\":").matcher(article_data),",  ","",0).replaceAll("[^0-9]", "");
+						try {
+							if(Integer.parseInt(price)<500) {
+								continue;
+							}
+						}
+						catch(Exception e) {
+						}
+						String address_string = GenMeth.webTextConvert(GenMeth.find_single_element(article_data,0,Pattern.compile("\"title\"").matcher(article_data),"\"  ","",9));
+						String[] address = address_string.split("\\,");
+						System.out.println(beds);
+						System.out.println(baths);
+						System.out.println(descrip);
+								System.out.println(price);
+										System.out.println(address);
+										
+						x.append("https://www.daft.ie"+article);
+						x.newLine();
+						x.append(beds);
+						x.newLine();
+						x.append(baths);
+						x.newLine();
+						try {
+							x.append(descrip.split("\\.")[0]+"."+descrip.split("\\.")[1]+"."+descrip.split("\\.")[2]+"."+descrip.split("\\.")[3]+".");
+						}
+						catch(Exception e) {
+							x.append(descrip);
+						}
+						x.newLine();
+						x.append(price);
+						x.newLine();
+						x.append(address[address.length-2].trim()+","+address[address.length-1]);
+						x.newLine();
+						x.append(media_writetofile);
+						x.newLine();
+						x.append("Property For Sale At "+address[0]+","+address[1]+". Price Is "+price+" Euros. Find More Information At The Link: daft.ie"+article);
+						x.newLine();
+						
+						ret[0] = "https://www.daft.ie"+article ;
+						ret[1] = beds;
+						ret[2] = baths;
+						ret[3] = descrip.replaceAll("\n", "").replaceAll("\\\\n", "").replaceAll("\\\\u0026", "").replaceAll("\u0026", "") ;
+						ret[4] = price;
+						ret[5] = address[address.length-2].trim()+","+address[address.length-1];
+						ret[6] = media_writetofile;
+						ret[7] = "Property For Sale At "+address[0]+","+address[1]+". Price Is "+price+" Euros. Find More Information At The Link: daft.ie"+article;
+						
+						try {
+							Map<String,String> amen_times = returnTopAmenities(address_string);
+							int ite = 8;
+							for(Entry<String,String> i:amen_times.entrySet()) {
+								try {
+									//if(Integer.parseInt(i.getValue().trim())<100) {
+										String putin = i.getKey()+": "+i.getValue()+" minutes";
+										x.append(putin);
+										x.newLine();
+										ret[ite] = putin;
+										ite+=1;
+									//}
+									//else {
+										
+									//}
+									
+								}
+								catch(Exception e) {
+									System.out.println("ISSUE IN AMENITIESssss");
+								}
+							}
+						}
+						catch(Exception e) {
+							System.out.println("ISSUE IN AMENITIES");
+						}
+										
+						x.close();		
+										
+										
+						
+						Process p = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\ireland_rentals\\imgprocess.bat");
+						Process p2 = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\ireland_rentals\\reel_content\\reel_process.bat");
+						break;
+					}
+					else {
+						x.close();
+						GenMeth.AppendToFile(article, "C:\\DESP\\user_content\\ireland_rentals\\article_archive.txt");
+						continue;
+					}
+				}
+				catch(Exception e) {
+					continue;
+				}
+			}
+			
+		}
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+		
+		return ret;
+		//System.out.println(data);       
+	}
+
+
+public static String[] CollectIrishIndependent() throws Exception {
+	String[] ret = new String[5];
+	//https://www.independent.ie/irish-news/politics/
+	String root = GenMeth.sendGET("https://www.independent.ie/irish-news/politics/");
+	String[] articlelinks = GenMeth.find_multiple_elements(root,Pattern.compile("https://www.independent.ie/irish-news/politics/").matcher(root),"\"  ","",0);
+	List<String> uniquelist = new ArrayList<String>();
+	for(String article:articlelinks) {
+		if(article.contains("html")) {
+			if(!uniquelist.contains(article))
+			{
+				System.out.println(article);
+				uniquelist.add(article);
+			}
+		}
+	}
+	
+	for(String article:uniquelist) {
+		String[] idnum = article.split("-");
+		String numd = idnum[idnum.length-1];
+		if(GenMeth.isEntryinfile(numd, "C:\\DESP\\user_content\\irish_politics_daily\\article_archive.txt")) {
+			continue;
+		}
+		else {
+			root = GenMeth.sendGET(article);
+			//GenMeth.writeWholeToFile(root,"C:\\DESP\\TMPFILE.txt" );
+			BufferedWriter x = new BufferedWriter(new FileWriter("C:\\DESP\\user_content\\irish_politics_daily\\imgdata.txt"));
+			
+			String articlesentences = GenMeth.webTextConvert(GenMeth.removeEncased(root.split("n-body1")[1].split("slot1-wrap")[1].replaceAll("\\s{2,}", " ").trim(), '<', '>')).replaceAll("&#[0-9]*;", "\"");
+			//if(articlesentences.contains("documentaddEventListener")) {
+			//	articlesentences = articlesentences.split("documentaddEventListener")[0];
+			//}
+			//String[] a = articlesentences.split("\\.");
+			//articlesentences = "";
+			//for(int u=1;u<a.length;++u) {
+			//	articlesentences = articlesentences.concat(". "+a[u]);
+			//}
+			String[] asciiEncodedString = articlesentences.split("\\.");
+			articlesentences = "";
+			for(int u=1;u<4;++u) {
+				articlesentences= articlesentences.concat(". "+asciiEncodedString[u]);
+			}
+			String title = GenMeth.webTextConvert(root.split("title>")[1].replaceAll("- Independent.ie</", "").replaceAll("&#[0-9]*;", "\""));
+			System.out.println(article);
+			System.out.println(title);
+			System.out.println("Source: "+article.split("/")[2]);
+			String image = GenMeth.webTextConvert(GenMeth.find_single_element(root,0,Pattern.compile("og:image").matcher(root),"\"  ","",19));
+			System.out.println(image);
+			//System.out.println("..."+asciiEncodedString[1]+"."+asciiEncodedString[2]+"."+asciiEncodedString[3]+".");
+			
+			x.append(article);
+			ret[0] = article;
+			x.newLine();
+			x.append(image);
+			ret[1] =image ;
+			x.newLine();
+			x.append(title.trim());
+			ret[2] =title.trim() ;
+			x.newLine();
+			x.append("irish_politics_daily");
+			ret[3] = "irish_politics_daily";
+			x.newLine();
+			//x.append(asciiEncodedString[1]+"."+asciiEncodedString[2]+"."+asciiEncodedString[3]+".");
+			//ret[4] =asciiEncodedString[1]+"."+asciiEncodedString[2]+"."+asciiEncodedString[3]+"." ;
+			x.append(articlesentences);
+			ret[4] =articlesentences ;
+			System.out.println(articlesentences.length());
+			
+			x.newLine();
+			x.close();
+			Process p = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\irish_politics_daily\\imgprocess.bat");
+			Process p2 = Runtime.getRuntime().exec("cmd /c start C:\\DESP\\user_content\\irish_politics_daily\\reel_content\\reel_process.bat");
+			GenMeth.AppendToFile(article, "C:\\DESP\\user_content\\irish_politics_daily\\article_archive.txt");
+			break;
+		}
+		
+	}
+	return ret;
+}
+
+
+	
+	
+	
+	
+}
