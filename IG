@@ -1,0 +1,810 @@
+package SMedia;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+
+import generalmethod.GenMeth;
+import selenium_methods.SGM;
+
+public class IG {
+	public static void main(String args[]) throws Exception {
+		System.setProperty("webdriver.chrome.driver", "C:\\\\WebDriver\\\\chromedriver.exe");
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("user-data-dir=C:/Users/user/AppData/Local/Google/Chrome/user2");
+		options.addArguments("--start-maximized");
+		WebDriver driver = new ChromeDriver(options);
+		try {
+			
+Set<String> poje = IG.whoFollowedWorstPost("https://www.instagram.com/untitled2.jpeg/",driver);
+		for(String x:poje) {
+			System.out.println(x);
+		}
+			
+			
+			
+			//IG.hashtagfinder("C:\\Users\\user\\Desktop\\candlebusiness.txt","C:\\Users\\user\\Desktop\\candleinstances.txt","C:\\Users\\user\\Desktop\\candleposts.txt",driver);
+			
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+			driver.quit();
+		}
+		finally{
+			driver.quit();
+		}
+		
+		}
+	public static Set<String> whoFollowedWorstPost(String account,WebDriver driver){
+		Set<String> ret = new HashSet<String>();
+		Set<String> postset = collectPostLinks(driver,account,3);
+		String worst_post_link = "";
+		int worst_post_number = 0;
+		for(String x:postset) {
+			driver.get(x);
+			SGM.pause(1);
+			 String like_number = "";
+			 try{like_number = SGM.elementByText(driver, "div", "likes").findElement(By.tagName("span")).getText();}
+			 catch(Exception e){System.out.println("ERROR: "+e.toString());}
+			 try{like_number = SGM.elementByText(driver, "div", "others").findElement(By.tagName("span")).getText();}
+			 catch(Exception e){System.out.println("ERROR: "+e.toString());}
+			 
+			if(worst_post_number==0||Integer.parseInt(like_number)<worst_post_number) {
+				worst_post_link = x;
+			}
+			else {
+				continue;
+			}
+		}
+		driver.get(worst_post_link+"liked_by/");
+		SGM.pause(1);
+//		try{SGM.elementByText(driver, "div", " likes").click();}
+//		 catch(Exception e){System.out.println("ERROR: "+e.toString());}
+//		 try{SGM.elementByText(driver, "div", " others").click();}
+//		 catch(Exception e){System.out.println("ERROR: "+e.toString());}
+		 SGM.pause(3);
+		ret.addAll(getAccountLinks(driver,20));
+		
+
+		return ret;
+	}
+	public static void MessagePermission(String account,String message,WebDriver driver) {
+		driver.get(account);
+			SGM.pause(5);
+			SGM.elementByText(driver, "div", "Message").click();
+			SGM.pause(3);
+			SGM.getElementContainsVal(driver, "textarea", "placeholder", "Message...").sendKeys(message+Keys.ENTER);
+	}
+	
+	public static Set<String> accountFindWithHashtags(String accounts,String hashtagfile,String postfile, WebDriver driver)throws Exception {
+		int ht_hit_parameter = 5;
+		BufferedReader hs_file = new BufferedReader(new FileReader(hashtagfile));
+		BufferedReader p_file =  new BufferedReader(new FileReader(postfile));
+		BufferedWriter possible_account_file = new BufferedWriter(new FileWriter(accounts));
+		
+		Set<String> ret = new HashSet<String>();
+		Set<String> hashtags = new HashSet<String>();
+		Set<String> posts = new HashSet<String>();
+		Set<String> messages = new HashSet<String>();
+		String line = "";
+		
+		while((line = hs_file.readLine()) != null){hashtags.add(line);}
+		while((line = p_file.readLine()) != null){posts.add(line);}
+		hs_file.close();
+		p_file.close();
+		
+		for(String x:posts) {
+			driver.get(x);
+			SGM.pause(10);
+			Set<String> hs_tag_set =  getPostHashtags(driver);
+			int ht_hits = 0;
+			for(String c:hs_tag_set) {
+				if(hashtags.contains(c)) {
+					ht_hits+=1;
+				}
+			}
+			List<WebElement> a_tags = driver.findElements(By.tagName("a"));
+			if(ht_hits>=ht_hit_parameter) {
+				for(WebElement ll:a_tags) {
+					if(ll.getAttribute("href").contains(ll.getText())&&ll.getAttribute("href").contains("instagram.com")) {
+						possible_account_file.append(ll.getAttribute("href"));
+						possible_account_file.newLine();
+					}
+				}
+			}
+		}
+			
+		possible_account_file.close();
+
+		BufferedReader possible_account_file_read = new BufferedReader(new FileReader(accounts));
+		while((line = possible_account_file_read.readLine()) != null){
+			
+			Set<String> acc_post_set = new HashSet<String>();
+			SGM.pause(3);
+			acc_post_set.addAll(collectPostLinks(driver,line,3));
+			List<String> hs_tag_list = new ArrayList<String>();
+			for(String link:acc_post_set) {
+				driver.get(link);
+				hs_tag_list.addAll(getPostHashtags(driver));
+				
+			}
+			int hashhit = 0;
+			for(String hashtag:hs_tag_list) {
+				if(hashtags.contains(hashtag)) {
+					hashhit+=1;
+				}
+				else {
+					continue;
+				}
+				
+			}
+			if(   ( (double) hashhit) /((double) hs_tag_list.size() )>=.20){
+				ret.add(line);
+			}
+			}
+		
+		
+		
+		 hs_file.close();
+		 p_file.close();
+		 return ret;
+		
+	}
+	public static void poje(String accounts,String hashtagfile,String postfile,String msgtemplate, WebDriver driver)throws Exception {
+		
+	}
+	public static Set<String> getPostHashtags(WebDriver driver){
+		List<WebElement> a_tags = driver.findElements(By.tagName("a"));
+		Set<String> hs_tag_set = new HashSet<String>();
+		for(WebElement ll:a_tags) {
+			String text = ll.getText();
+			if(text.contains("#")) {
+				hs_tag_set.add(text);
+				
+			}
+			else {
+				continue;
+			}
+		}
+		return hs_tag_set;
+	}
+	public static void hashtagfinder(String hashtagfile,String entryfile,String postfile, WebDriver driver)throws Exception {
+		Set<String> hashtags1 = new HashSet<String>();
+		Map<String,String> hashtags2 = new HashMap<String,String>();
+		Set<String> postset = new HashSet<String>();
+		
+		BufferedWriter buf_w = new BufferedWriter(new FileWriter(entryfile));
+		BufferedWriter posts = new BufferedWriter(new FileWriter(postfile));
+		BufferedReader buf_r =  new BufferedReader(new FileReader(hashtagfile));
+		String line;
+		while((line = buf_r.readLine()) != null){
+				hashtags1.add(line);
+		}
+		buf_r.close();
+		for(String hs:hashtags1) {
+			postset.addAll(collectPostLinks(driver,"https://www.instagram.com/explore/tags/"+hs,50));
+		}
+		for(String link:postset) {
+			posts.append(link);
+			posts.newLine();
+		}
+		posts.close();
+		for(String link:postset) {
+			driver.get(link);
+			SGM.pause(5);
+			List<WebElement> posths = driver.findElements(By.tagName("a"));
+			for(WebElement ll:posths) {
+				String text = ll.getText();
+				if(text.contains("#")) {
+					if(hashtags2.containsKey(text)) {
+						String iter =  String.valueOf(Integer.parseInt(hashtags2.get(text)+1));
+						hashtags2.put(text,iter);
+					}
+					else {
+						hashtags2.put(text,"1");
+					}
+					
+				}
+				else {
+					continue;
+				}
+			}
+		}
+		for(Entry<String,String> x:hashtags2.entrySet()) {
+			buf_w.append(x.getKey()+","+x.getValue());
+			buf_w.newLine();
+		}
+		buf_r.close();
+		buf_w.close();
+		
+		
+	}
+	public static void personalGrowth(String hashtagfile, WebDriver driver)throws Exception {
+		Set<String> accounts = new HashSet<String>();
+		Set<String>  tags = new HashSet<String>();
+		Set<String>  posts = new HashSet<String>();
+		Set<String> hashtags1 = new HashSet<String>();
+		Set<String> hashtags2 = new HashSet<String>();
+		float ff_ratio = (float) .5;
+		int max_size = 10000;
+		int min_size = 100;
+		int max_date = 30;
+		
+		BufferedReader buf_r =  new BufferedReader(new FileReader(hashtagfile));
+		String line;
+		while((line = buf_r.readLine()) != null){
+				hashtags1.add(line);
+		}
+		buf_r.close();
+		driver.get("https://www.instagram.com/");
+		SGM.SaveSessionCookies(driver,"C:\\SMBa\\site_IG\\httpcookies.txt");
+		BufferedReader buf_r2 =  new BufferedReader(new FileReader("C:\\SMBa\\site_IG\\httpcookies.txt"));
+		String cookies = buf_r2.readLine();
+		buf_r2.close();
+		
+		//BufferedWriter buf_w = new BufferedWriter(new FileWriter("C:\\\\SMBa\\\\site_IG\\\\accountrelations.txt"));
+			
+		Set<String> exploreposts = new HashSet<String>();
+		while(true) {
+			BufferedWriter buf_w2 = new BufferedWriter(new FileWriter("C:\\SMBa\\site_IG\\postlinks.txt"));
+			
+			for(String htag:hashtags1) {
+				Set<String> expost1 = collectPostLinks(driver,"https://www.instagram.com/explore/tags/"+htag,30);
+				 exploreposts.addAll(expost1);
+				 File file = new File("C:\\SMBa\\site_IG\\"+htag+".txt");
+				 BufferedWriter buf_w3 = new BufferedWriter(new FileWriter("C:\\SMBa\\site_IG\\"+htag+".txt"));
+				 for(String x:expost1) {
+						buf_w3.write(x);
+						buf_w3.newLine();
+					}
+				 buf_w3.close();
+				 
+				for(String ep:exploreposts) {
+					System.out.println(ep);
+				}
+			}
+			
+			
+			buf_w2.close();
+			
+				for(String ep:exploreposts) {
+					try{
+						String webdata = GenMeth.GeneralHTTPRequest("GET",cookies, "", ep)[0];
+						String[] posttags = GenMeth.find_multiple_elements(webdata,Pattern.compile("username").matcher(webdata),"\"  ","",11);
+						//String[] hashtags = GenMeth.find_multiple_elements(webdata,Pattern.compile("instapp:hashtags").matcher(webdata),"\"  ","",27);
+						System.out.println("post tag sample: "+posttags[0]);
+						//System.out.println("hash tag sample: "+hashtags[0]);
+						String accountname = GenMeth.findMaxArrayFrequency(posttags); 
+								//GenMeth.find_single_element(webdata,0,Pattern.compile("alternateName").matcher(webdata),"\", ","",17);
+						System.out.println("Account name: "+accountname);
+						for(String f:posttags) {
+							//buf_w.write(accountname+"::"+f);
+							//buf_w.newLine();
+						}
+				        if(accounts.contains(accountname)==false) {
+				        	accounts.add(accountname);
+				        	for(String xx:posttags) {
+				        		tags.add(xx);
+				        	}
+//				        	for(String xx:hashtags) {
+//				        		hashtags2.add(xx);
+//				        	}
+				        	
+				        	//webdata = GenMeth.GeneralHTTPRequest("GET","", "", "https://www.instagram.com/"+accountname)[0];
+				        
+				        	driver.get("https://www.instagram.com/"+accountname);
+				        	
+				        	//GenMeth.find_single_element(webdata,0,Pattern.compile("edge_followed_by").matcher(webdata),"}  ","",27);
+				        	//GenMeth.find_single_element(webdata,0,Pattern.compile("edge_follow").matcher(webdata),"}  ","",22);
+							
+				        	float followers = Float.parseFloat(SGM.getSpecElement(driver, "a", "href", "/"+accountname+"/followers/", 0).findElement(By.tagName("span")).getText().replaceAll("m", "000000").replaceAll("\\.", "").replaceAll("k", "000").replaceAll("\"", "").replaceAll(",", ""));
+				        	float following = Float.parseFloat(SGM.getSpecElement(driver, "a", "href", "/"+accountname+"/following/", 0).findElement(By.tagName("span")).getText().replaceAll("m", "000000").replaceAll("\\.", "").replaceAll("k", "000").replaceAll("\"", "").replaceAll(",", ""));
+				        	WebElement[] accountposts = SGM.getElementsContainsVal(driver, "a", "href", "/p/");
+				        	if(followers > (float) min_size&& followers<(float)max_size) {
+				        		try{
+				        			IG.followAccount(accountname,driver);
+						        	
+						        	String postlink0 = accountposts[0].getAttribute("href");
+						        	String postlink1 = accountposts[1].getAttribute("href");
+						        	String postlink2 = accountposts[2].getAttribute("href");
+						        		//driver.get(accountposts[i].getAttribute("href"));
+//						        		String datetime = driver.findElement(By.tagName("time")).getAttribute("datetime").substring(0, 10);
+//						        		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//						        		Date date = sdf.parse(datetime);
+//						        		Date datenow = new Date();
+//						        	    long monthago = datenow.getTime() - 2592000000L;
+//						        		long uploaddate = date.getTime();
+//						        		if( monthago < uploaddate) {
+						        			IG.likePost(driver,postlink0);
+						        			IG.likePost(driver,postlink1);
+						        			IG.likePost(driver,postlink2);
+						        			//posts.add(accountposts[i].getAttribute("href"));
+						        		//}
+						        	
+
+
+				        		}
+				        		catch(Exception e){
+				        			System.out.println("ERROR: "+e.toString());
+				        			System.out.println("ERROR: "+e.toString());
+				        			System.out.println("Description: "+e.getMessage());
+				        		}
+				        		finally{
+				        		}
+				        	}
+				        	
+				        	
+				        }
+
+
+					}
+					catch(Exception e){
+						System.out.println("ERROR: "+e.toString());
+						System.out.println("ERROR: "+e.toString());
+						System.out.println("Description: "+e.getMessage());
+					}
+					finally{
+					}
+					
+				}
+			
+		}
+		
+
+		
+				
+				
+	}
+	public static void getPopreyLikes(String username,int no_of_posts,WebDriver driver) {
+		driver.get("https://poprey.com/");
+		SGM.getElementContainsVal(driver, "button", "id", "25LIK").click();
+		SGM.getElementContainsVal(driver, "input", "name", "username").sendKeys(username);
+		SGM.getElementContainsVal(driver, "input", "name", "email").sendKeys("buachailbeag@gmail.com");
+		SGM.elementByText(driver, "button", "Free Test").click();
+		SGM.pause(1);
+		WebElement[] poje = SGM.getElementsContainsVal(driver, "li", "class", "postsList__card");
+		poje[0].click();
+		poje[1].click();
+		SGM.pause(1);
+		SGM.elementByText(driver, "button", "Free Test").click();
+		SGM.pause(1);
+	}
+//	public static void makePost(WebDriver driver, String post_pathname, String caption, String[] hashtags, String location) {
+//		driver.get("http://www.instagram.com/");
+//		Actions actions = new Actions(driver);
+//		SGM.pause(2);
+//		actions.click(SGM.getElementContainsVal(driver, "svg", "aria-label","New post")).build().perform();
+//		SGM.pause(100);
+//		SGM.getElementContainsVal(driver, "input", "accept","image/jpeg,image/png,image/heic,image/heif,video/mp4,video/quicktime").sendKeys(post_pathname);
+//		SGM.pause(2);
+//		try {
+//			SGM.getElementContainsVal(driver, "svg", "aria-label","Select crop").click();
+//			SGM.pause(1);
+//			SGM.getElementContainsVal(driver, "svg", "aria-label","Photo outline icon").click();
+//			}catch(Exception e) {}
+//			
+//		SGM.elementByText(driver, "button", "Next").click();
+//		SGM.pause(2);
+//		SGM.elementByText(driver, "button", "Next").click();
+//		SGM.pause(1);
+//		SGM.getElementContainsVal(driver, "textarea", "aria-label","Write a caption...").sendKeys(caption+Keys.ENTER);
+//		for(String x:hashtags) {
+//			SGM.getElementContainsVal(driver, "textarea", "aria-label","Write a caption...").sendKeys("#"+x+Keys.SPACE);
+//		}
+//		SGM.getElementContainsVal(driver, "input", "placeholder","Add Location").sendKeys(location);
+//		SGM.elementByText(driver, "button", "Share").click();
+//		
+//		//SGM.getSpecElement(driver, "form", "enctype", "multipart/form-data", 2).submit();
+//		
+//		//SGM.elementByText(driver, "button", "Select From Computer").sendKeys(post_pathname);
+//		
+//	}
+	public static void togglePrivacy(WebDriver driver) {
+		
+		Actions actions = new Actions(driver);
+		driver.get("https://www.instagram.com/accounts/privacy_and_security/");
+		//SGM.getSpecElement(driver, "div", "class","mwD2G",0).click();
+		SGM.pause(1);
+		SGM.elementByText(driver, "label", "Private account").click();
+
+		
+//		actions.click(SGM.getElementContainsVal(driver, "div", "id","accountPrivacy")).build().perform();
+//		SGM.pause(3);
+//		SGM.getElementContainsVal(driver, "div", "id","accountPrivacy").sendKeys(Keys.ENTER);
+//		SGM.pause(3);
+//		SGM.getElementContainsVal(driver, "div", "id","accountPrivacy").click();
+		//actions.doubleClick().build().perform();
+		//SGM.getElementContainsVal(driver, "input", "class","tlZCJ").click();
+		//SGM.getElementContainsVal(driver, "div", "class","mwD2G").click();
+		SGM.pause(5);		
+	}
+	
+	public static void savePostImages(WebDriver driver,String URL) {
+		Actions actions = new Actions(driver);
+		driver.get(URL);
+		Set<WebElement> imgset = new HashSet<WebElement>();
+		for(int i=0;i<=10;++i) {
+		try{
+			SGM.pause(1);
+			SGM.getSpecElement(driver, "div", "class","    coreSpriteRightChevron  ",0).click();
+			SGM.getSpecElement(driver, "div", "class","coreSpriteRightChevron",0).click();
+			SGM.getSpecElement(driver, "button", "class","  _6CZji  ",0).click();
+			SGM.getSpecElement(driver, "button", "class","_6CZji",0).click();
+
+			actions.doubleClick(SGM.getSpecElement(driver, "div", "class","    coreSpriteRightChevron  ",0)).build().perform();
+			actions.doubleClick(SGM.getSpecElement(driver, "div", "class","coreSpriteRightChevron",0)).build().perform();
+			actions.doubleClick(SGM.getSpecElement(driver, "button", "class","  _6CZji  ",0)).build().perform();
+			actions.doubleClick(SGM.getSpecElement(driver, "button", "class","_6CZji",0)).build().perform();
+			
+			imgset.addAll(SGM.getSpecElement(driver, "ul", "class", "vi798",0).findElements(By.className("FFVAD")));
+			
+		}
+		catch(Exception e){
+			break;
+		}
+		}
+		System.out.println(imgset.size());
+	}
+	public static String[] sessionCookieDomains(WebDriver driver) {
+		Set<String> set = new HashSet<String>();
+		Iterator<Cookie> cook = driver.manage().getCookies().iterator();
+		while(cook.hasNext()) {
+			set.add(cook.next().getDomain());
+		}
+		String[] ret = new String[set.size()];
+		set.toArray(ret);
+		return ret;
+	}
+	public static Set<String> collectPostLinks(WebDriver driver, String URL,int scroll_number) {
+		Set<String> set = new HashSet<String>();
+		Set<String> ret = new HashSet<String>();
+		 JavascriptExecutor js = (JavascriptExecutor) driver;
+		driver.get(URL);
+		SGM.pause(6);
+		for(int i = 0;i<scroll_number;++i) {
+			List<WebElement> elements = driver.findElements(By.tagName("a"));
+			for(WebElement y:elements) {
+				if(y.getAttribute("href").contains("/p/")) {
+					set.add(y.getAttribute("href"));
+				}
+				else {
+					continue;
+				}
+			}
+			js.executeScript(" window.scrollBy(0,948)");
+			
+		}
+		for(String x:set) {
+			ret.add(x);
+		}
+		return ret;
+	}
+	public static Set<String> getAccountLinks(WebDriver driver,int scroll_number) {
+		Set<String> set = new HashSet<String>();
+		Set<String> ret = new HashSet<String>();
+		 JavascriptExecutor js = (JavascriptExecutor) driver;
+		SGM.pause(6);
+		for(int i = 0;i<scroll_number;++i) {
+			List<WebElement> elements = driver.findElements(By.tagName("a"));
+			for(WebElement x:elements) {
+				String linker = x.getAttribute("href");
+				if(!linker.contains(".com/blog/")&&!linker.contains(".com/legal/")&&!linker.contains(".com/explore/")&&!linker.contains(".com/direct/inbox/")&&!linker.contains(".com/docs/")&&!linker.contains(".com/about/")&&!linker.contains(".com/accounts/")&&!linker.contains("//help"))
+				ret.add(x.getAttribute("href"));
+			}
+			js.executeScript("window.scrollBy(0,948)");
+			
+		}
+		for(String x:set) {
+			ret.add(x);
+		}
+		return ret;
+	}
+	public static void sendPost(WebDriver driver, String[] people, String post_url) {
+		driver.get(post_url);
+		SGM.getSpecElement(driver, "svg", "aria-label", "Share Post",0).click();
+		if(people.length==0) {
+			SGM.pause(5);
+			List<WebElement> friends = driver.findElements(By.cssSelector("svg[aria-label=Toggle selection]"));
+			for(WebElement x:friends) {
+				try {
+					x.click();
+				}
+				catch(Exception e) {}
+			}
+		}
+		else {
+			for(String x:people) {
+				SGM.getSpecElement(driver, "input", "placeholder", "Search...",0).clear();
+				SGM.getSpecElement(driver, "input", "placeholder", "Search...",0).sendKeys(x);
+				SGM.pause(2);
+				try {
+					SGM.getSpecElement(driver, "svg", "aria-label", "Toggle selection",0).click();
+				}
+				catch(Exception e) {
+					System.out.println("WARNING: Failed to send the post {"+post_url+"} to \""+x+"\"");
+				}
+				
+				
+			}
+		}
+		
+	}
+	
+	public static void sendMessage(WebDriver driver, String name, String message) {
+		driver.get("https://www.instagram.com/direct/inbox/");
+		SGM.getSpecElement(driver, "svg", "aria-label", "New message",0).click();
+		SGM.getSpecElement(driver, "input", "placeholder", "Search...",0).sendKeys(name);
+		SGM.pause(2);
+		SGM.getSpecElement(driver, "svg", "aria-label", "Toggle selection",0).click();
+		SGM.elementByText(driver, "div", "Next").click();
+		SGM.pause(2);
+		SGM.getSpecElement(driver, "textarea", "placeholder", "Message...",0).sendKeys(message);
+		SGM.elementByText(driver, "button", "Send").click();
+	}
+	
+	public static void changeName(WebDriver driver, String new_name) {
+		driver.get("https://www.instagram.com/accounts/edit/");
+		SGM.getSpecElement(driver, "input", "id", "pepName",0).clear();
+		SGM.getSpecElement(driver, "input", "id", "pepName",0).sendKeys(new_name);
+		SGM.elementByText(driver, "button", "Submit").click();
+	}
+	public static void changeUsername(WebDriver driver, String new_name) {
+		driver.get("https://www.instagram.com/accounts/edit/");
+		SGM.getSpecElement(driver, "input", "id", "pepUsername",0).clear();
+		SGM.getSpecElement(driver, "input", "id", "pepUsername",0).sendKeys(new_name);
+		SGM.elementByText(driver, "button", "Submit").click();
+		}
+	public static void changeBioWebsite(WebDriver driver, String new_name) {
+		driver.get("https://www.instagram.com/accounts/edit/");
+		SGM.getSpecElement(driver, "input", "id", "pepWebsite",0).clear();
+		SGM.getSpecElement(driver, "input", "id", "pepWebsite",0).sendKeys(new_name);
+		SGM.elementByText(driver, "button", "Submit").click();
+		}
+	public static void changeBio(WebDriver driver, String new_name) {
+		driver.get("https://www.instagram.com/accounts/edit/");
+		SGM.getSpecElement(driver, "input", "id", "pepBio",0).clear();
+		SGM.getSpecElement(driver, "input", "id", "pepBio",0).sendKeys(new_name);
+		SGM.elementByText(driver, "button", "Submit").click();
+		}
+	public static void changeProfilePic(WebDriver driver, String new_name) {
+		driver.get("https://www.instagram.com/accounts/edit/");
+		Actions actions = new Actions(driver);
+		SGM.elementByText(driver, "button", "Change profile photo").click();
+		SGM.elementByText(driver, "button", "Change profile photo").click();
+		actions.doubleClick(SGM.elementByText(driver, "button", "Change profile photo")).build().perform();
+		SGM.pause(3);
+		SGM.elementByText(driver, "button", "Change profile photo").sendKeys(new_name);
+	}
+	
+	
+	public static void reportPost(WebDriver driver,String URL,String reportoption) {
+		Actions actions = new Actions(driver);
+		driver.get(URL);
+		try{
+			SGM.pause(1);
+			actions.click(SGM.getSpecElement(driver, "svg", "aria-label", "More Options",0)).build().perform();
+			SGM.pause(1);
+			SGM.elementByText(driver, "button", "Report").click();
+			SGM.pause(1);
+			SGM.elementByText(driver, "button", reportoption).click();
+			SGM.pause(1);
+			SGM.elementByText(driver, "button", "Close").click();
+			
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+	}
+	public static void likePost(WebDriver driver,String URL) {
+		Actions actions = new Actions(driver);
+		driver.get(URL);
+		try{
+			SGM.pause(3);
+			actions.click(SGM.getSpecElement(driver, "svg", "aria-label", "Like",1)).build().perform();
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+		finally {
+			
+		}
+	}
+	public static void unlikePost(WebDriver driver,String URL) {
+		Actions actions = new Actions(driver);
+		driver.get(URL);
+		try{
+			SGM.pause(1);
+			actions.click(SGM.getSpecElement(driver, "svg", "aria-label", "Unlike",0)).build().perform();
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+	}
+	
+	public static void savePost(WebDriver driver,String URL) {
+		Actions actions = new Actions(driver);
+		driver.get(URL);
+		try{
+			SGM.pause(1);
+			actions.click(SGM.getSpecElement(driver, "svg", "aria-label", "Save",0)).build().perform();
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+	}
+	
+	
+	public static void writeComment(WebDriver driver,String URL,String comment) {
+		Actions actions = new Actions(driver);
+		driver.get(URL);
+		try{
+			SGM.pause(1);
+			//actions.click(SGM.getSpecElement(driver, "textarea", "aria-label", "Add a comment…",0)).build().perform();
+			SGM.getSpecElement(driver, "textarea", "aria-label", "Add a comment…",0).sendKeys(comment);
+			SGM.pause(1);
+			SGM.getSpecElement(driver, "button", "data-testid", "post-comment-input-button",0).click();
+			
+		}
+		catch(Exception e){
+			System.out.println("ERROR: "+e.toString());
+			System.out.println("Description: "+e.getMessage());
+		}
+	}
+	public static String[] collectPostHashtags(WebDriver driver, String post_URL) {
+		Set<String> list = new HashSet<String>();
+		
+		driver.get(post_URL);
+		int iter = 0;
+		while(true) {
+			try{
+				String hashtag = SGM.getSpecElement(driver, "a", "href", "explore/tag", iter).getAttribute("href").substring(38).replaceAll("/","");
+				list.add(hashtag);
+				iter+=1;
+			}
+			catch(Exception e){
+				break;
+				}
+			finally{
+			}
+		}
+		
+		
+		
+		
+		String[] ret = new String[list.size()];
+		ret = list.toArray(ret);
+		return ret;
+	}
+	
+	public static void likeFeed(WebDriver driver) {
+		Actions actions = new Actions(driver);
+		
+		  JavascriptExecutor js = (JavascriptExecutor) driver;
+		  Set<WebElement> set1 = new HashSet<WebElement>(driver.findElements(By.cssSelector("div[role=button]")));
+		  Set<WebElement> set2 = new HashSet<WebElement>();
+		  while(true) {
+			  
+			  
+			  for(WebElement x:set1) {
+				  if(set2.contains(x)) {
+					  
+				  }
+				  else {
+					  try{
+						  //js.executeScript(" window.scroll({top:"+x.getLocation().getY()+",behavior: 'smooth'})");
+						  js.executeScript(" window.scrollBy(0,948)");
+						  SGM.pause(1);
+//						 
+						  //actions.doubleClick(x).perform();actions.doubleClick(x).perform();
+						 
+						 }
+					  catch(Exception e){
+					  	System.out.println("ERROR: "+e.toString());
+					  	System.out.println("ERROR: "+e.toString());
+					  	System.out.println("Description: "+e.getMessage());
+					  }
+					  finally{
+						  
+						  
+					  }
+					
+				}
+					
+				}
+			  js.executeScript(" window.scrollBy(0,9480)");
+			  set2 = new HashSet<WebElement>(driver.findElements(By.cssSelector("svg[aria-label=Like]")));
+			  if(set2.size()<=set1.size()) {
+				  break;
+			  }
+			  for(WebElement x:set2) {
+				  if(set1.contains(x)) {
+					  
+				  }
+				  else {
+					  try{
+						  //js.executeScript(" window.scroll({top:"+x.getLocation().getY()+",behavior: 'smooth'})");
+						  js.executeScript(" window.scrollBy(0,948)");
+						  SGM.pause(1);
+//						 
+						  //actions.doubleClick(x).perform();actions.doubleClick(x).perform();
+						 
+						 }
+					  catch(Exception e){
+					  	System.out.println("ERROR: "+e.toString());
+					  	System.out.println("ERROR: "+e.toString());
+					  	System.out.println("Description: "+e.getMessage());
+					  }
+					  finally{
+						  
+						  
+					  }
+				  }
+					
+				}
+			  set1 = new HashSet<WebElement>(driver.findElements(By.cssSelector("svg[aria-label=Like]")));
+			  if(set1.size()<=set2.size()) {
+				  break;
+			  }
+			  
+				}
+				
+
+			
+			
+		
+	}
+	public static void followAccount(String username,WebDriver driver) {
+		Actions actions = new Actions(driver);
+		SGM.elementFullText(driver, "div", "Follow").click();
+		SGM.pause(2);
+	}
+	public static void IGlogin(String username,String password,WebDriver driver) {
+		driver.get("https://www.instagram.com/");
+		SGM.pause(2);
+		SGM.elementByText(driver, "button", "Accept All").click();
+		SGM.getElementContainsVal(driver, "input", "name", "username").sendKeys(username);
+		SGM.getElementContainsVal(driver, "input", "name", "password").sendKeys(password);
+		SGM.pause(2);
+		SGM.getElementContainsVal(driver, "button", "type", "submit").click();
+		SGM.pause(4);
+		SGM.elementByText(driver, "button", "Not Now").click();
+		SGM.pause(3);
+		SGM.elementByText(driver, "button", "Not Now").click();
+		//SGM.getElementContainsVal(driver, "img", "alt", "Instagram").click();
+		
+		
+	}
+	
+
+}
