@@ -1,0 +1,114 @@
+package commerce_listing;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+
+import generalmethod.GenMeth;
+
+public class ListingSavers {
+	public static String root_filepath = "C:\\DESP\\aliexpress_listingpages";
+	
+	
+	public static void main(String args[]) throws Exception {
+		List<Map<String,String>> dat = listingsData();
+		FileOutputStream w = new  FileOutputStream("C:\\DESP\\aliexpress_listingarchives\\newListings.txt");
+		w.close();
+		for(Map<String,String> x:dat) {
+			String listing = x.get("title").replaceAll("\\,", ".")+","+x.get("url")+","+x.get("img")+","+x.get("sell_price")+","+x.get("max_buy_price");
+			GenMeth.appendFile("C:\\DESP\\aliexpress_listingarchives\\fullArchive.txt", listing);
+			GenMeth.appendFile("C:\\DESP\\aliexpress_listingarchives\\newListings.txt", listing);
+		}
+		
+		
+		
+		
+	}
+	
+	public static List<Map<String,String>> listingsData() throws Exception{
+		
+		List<Map<String,String>> ret = new ArrayList<Map<String,String>>();
+		
+		File folder = new File(root_filepath);
+		File[] listOfFiles = folder.listFiles();
+
+		for (int i = 0; i < listOfFiles.length; i++) {
+		  if (listOfFiles[i].isFile()&&listOfFiles[i].getName().contains(".html")) {
+			  String fileName= root_filepath+"\\"+listOfFiles[i].getName();
+			try {
+				String data = new Scanner(new File(fileName)).useDelimiter("\\Z").next();
+				GenMeth.appendFile("C:\\DESP\\TMPfile.txt", data);
+				String url = "https://"+GenMeth.find_single_element(data,0,Pattern.compile("\"og:url\"").matcher(data),"\"  ","",20);
+				System.out.println("fileName:"+fileName);
+				System.out.println("url:"+url);
+				String title = GenMeth.find_single_element(data,0,Pattern.compile("\"og:title\"").matcher(data),"\"  ","",21);
+				System.out.println("title:"+title);
+				String img = GenMeth.find_single_element(data,0,Pattern.compile("\"og:image\"").matcher(data),"\"  ","",20);
+				System.out.println("img:"+img);
+				
+				BufferedReader red = new BufferedReader(new FileReader(fileName));
+				String line ="";
+				String price1="";
+				while((line=red.readLine())!= null) {
+					try {
+						price1 = GenMeth.find_single_element(line,0,Pattern.compile("product-price-value").matcher(line),"<  ","",0);
+						if(!price1.equals("")) {
+							break;
+						}
+					}
+					catch(Exception e) {
+						
+					}
+				}
+				red.close();
+
+				System.out.println(" price1:"+price1);
+				String finalprice = price1.replaceAll("\\,","\\.").replaceAll("[^0-9.]", "");
+		
+
+//				if(price1.contains("-")) {
+//					String[] prices = price1.split("-");
+//					prices[0] = prices[0].replaceAll("\\,","\\.").replaceAll("[^0-9.]", "");
+//					prices[1] = prices[1].replaceAll("\\,","\\.").replaceAll("[^0-9.]", "");
+//					price1 = String.valueOf((Float.parseFloat(prices[0]) +Float.parseFloat(prices[1]))/2); 
+//				}
+//				else {
+//					
+//				}
+				
+				String sell_price = String.valueOf((5*(Math.ceil(Float.parseFloat(finalprice)*3/5))));
+				String max_buy_price = String.valueOf(Float.parseFloat(sell_price)/2);
+				
+				Map<String,String> usergens_webserverfolders = new HashMap<String,String>(){{
+					put("title",title);
+					put("url",url);
+					put("img",img);
+					put("sell_price",sell_price);
+					put("max_buy_price",max_buy_price);
+					put("price",finalprice);
+				}};
+				
+				ret.add(usergens_webserverfolders);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			  
+		  }
+		}
+		
+		return ret;
+	}
+	
+}
