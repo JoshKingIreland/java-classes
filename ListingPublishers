@@ -1,0 +1,73 @@
+package commerce_listing;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+
+import selenium_methods.SGM;
+
+public class ListingPublishers {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+	
+	public static void fbMarketplace(WebDriver driver,String title,String img_link,String caption,String price,String category) {
+		
+		
+		driver.get("https://www.facebook.com/marketplace/create/item");
+		
+		List<WebElement> divs = driver.findElements(By.tagName("div"));
+		
+		for(WebElement div:divs) {
+			
+			if(div.findElement(By.tagName("span")).getText().contains("Title")) {
+				div.findElement(By.tagName("input")).sendKeys(title);
+			}
+			
+			if(div.findElement(By.tagName("span")).getText().contains("Price")) {
+				div.findElement(By.tagName("input")).sendKeys(title);
+			}
+			
+			if(div.findElement(By.tagName("span")).getText().contains("Description")) {
+				div.findElement(By.tagName("textarea")).sendKeys(title);
+			}
+			
+			
+			
+		}
+		
+		SGM.getElementContainsVal(driver, "input", "accept", "image/*,image/heif,image/heic").sendKeys(img_link);
+		Actions actions = new Actions(driver);
+		
+		actions.click(SGM.elementByText(driver, "span","Category")).build().perform();
+		actions.click(SGM.elementByText(driver, "span",category)).build().perform();
+		
+		actions.click(SGM.elementByText(driver, "span","Condition")).build().perform();
+		actions.click(SGM.elementByText(driver, "span","New")).build().perform();
+		
+		actions.click(SGM.elementByText(driver, "span","Next")).build().perform();
+		
+		actions.click(SGM.elementByText(driver, "span","Publish")).build().perform();
+
+		
+	}
+	
+	public static void Adverts(WebDriver driver,String title,String img_link,String caption,String price) {
+		driver.get("https://www.adverts.ie/sell/32");
+		SGM.InterruptForElement(10, "#title", driver).sendKeys(title);
+		SGM.InterruptForElement(10, "#description", driver).sendKeys(caption);
+		SGM.getElementContainsVal(driver, "input", "accept", "image/*").sendKeys(img_link);
+		SGM.InterruptForElement(10, "#price", driver).sendKeys(price);
+		
+		Actions actions = new Actions(driver);
+		actions.click(SGM.InterruptForElement(10, "#btn-save", driver)).build().perform();
+		
+		
+	}
+
+}
